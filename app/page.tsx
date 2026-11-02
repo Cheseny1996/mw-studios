@@ -263,13 +263,10 @@ export default function Home() {
 
       <main>
         <section className="mw-hero" id="home">
-          <div className="hero-orbit hero-orbit-one" aria-hidden="true">01</div>
-          <div className="hero-orbit hero-orbit-two" aria-hidden="true">MW</div>
           <div className="hero-content">
-            <span className="hero-kicker">STORIES • SOUND • CULTURE</span>
-            <h2><span>Welcome to</span> MzimaWells Studios</h2>
-            <p>Where creativity moves, African stories lead, and every voice can become a movement.</p>
-            <div className="hero-actions"><a href="#what-we-do">Explore our work</a><a href="/blog">Read our journal</a></div>
+            <h2>Welcome to MzimaWells Studios</h2>
+            <p>Where Creativity Flows and Stories Come to Life</p>
+            <a href="#what-we-do">Explore Our Work</a>
           </div>
         </section>
 
