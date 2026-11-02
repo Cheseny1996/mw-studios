@@ -186,7 +186,6 @@ export default function Home() {
   const nav = [
     ["Home", "#home"],
     ["Blog", "/blog"],
-    ["Kapsokwony Run", "/events"],
     ["Events", "/events"],
     ["Jishindie", "/jishindie"],
     ["Careers", "/careers"],
@@ -283,7 +282,6 @@ export default function Home() {
           <div className="what-grid">
             {[
               ["▶", "Video Production", "Professional video production services for music videos, commercials, and documentaries.", "/about"],
-              ["●", "Kapsokwony Run", "The famous annual Kapsokwony community run, presented as the K-Run event.", "/events"],
               ["▣", "Events", "Creating memorable experiences through professional event coverage and management.", "/events"],
               ["♛", "Jishindie Challenge", "Empowering creators through our innovative creative competition platform.", "/jishindie"],
             ].map(([icon, title, copy, href]) => (
