@@ -59,11 +59,6 @@ export async function GET(request: NextRequest) {
       slug,
       title: "Weekly Jishindie Challenge",
       status: "registration",
-      prizes: [
-        { name: "Grand Prize", reward: "Feature outfit + branded merchandise" },
-        { name: "Runner Up", reward: "MzimaWells hoodie + studio access" },
-        { name: "Fan Favourite", reward: "MzimaWells mug + branded T-shirt" },
-      ],
     },
     registered,
     contestants: approved.map((entry) => ({
