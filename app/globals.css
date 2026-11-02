@@ -1,6 +1,9 @@
 @import "tailwindcss";
 
 .mw-brand img { display:block !important; width:48px !important; height:48px !important; border-radius:7px; }
+.what-grid .what-card { display:block; color:inherit; min-height:190px; padding:34px 24px; text-align:center; border-radius:7px; background:#fff; box-shadow:0 6px 24px rgba(30,40,60,.08); transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease; border:1px solid transparent; cursor:pointer; }
+.what-grid .what-card:hover,.what-grid .what-card:focus-visible { transform:translateY(-6px); box-shadow:0 14px 34px rgba(233,82,30,.16); border-color:#ffd0bf; outline:none; }
+.what-card-action { display:inline-flex; align-items:center; gap:7px; margin-top:14px; color:#e9521e; font-size:13px; font-weight:900; opacity:0; transform:translateY(5px); transition:.2s ease; }.what-card:hover .what-card-action,.what-card:focus-visible .what-card-action { opacity:1; transform:translateY(0); }.what-card-action b { font-size:17px; }
 .jishindie-heading { position:relative; }
 .live-pill { display:inline-flex; align-items:center; margin-bottom:12px; border-radius:999px; padding:7px 12px; background:#fff2eb; color:#e9521e; font-size:11px; font-weight:900; letter-spacing:.8px; }
 .challenge-banner { max-width:1120px; margin:0 auto 30px; min-height:220px; display:flex; align-items:center; justify-content:space-between; gap:30px; padding:42px; border-radius:16px; color:#fff; background:linear-gradient(120deg,#171d2f,#e84f20); box-shadow:0 18px 50px rgba(26,35,56,.18); }
