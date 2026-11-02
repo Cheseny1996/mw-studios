@@ -11,6 +11,10 @@ npm run dev
 ```
 
 Set `MONGODB_URI` to a MongoDB Atlas connection string in `.env.local`.
+Set `AUTH_SECRET` to a unique, long random value. To bootstrap a global administrator,
+set `SUPER_ADMIN_EMAIL` to the administrator's email before that account registers.
+Restart the development server after changing `.env.local`. Never commit the file or
+share the secret values.
 
 ## Database health
 

@@ -98,10 +98,20 @@ export default function AdminPage() {
     event.preventDefault();
     const form = event.currentTarget;
     const body = Object.fromEntries(new FormData(form));
-    const response = await fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) { setNotice(data.error || "Sign-in failed."); return; }
-    window.location.reload();
+    setNotice("");
+    try {
+      const response = await fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setNotice(data.error || (response.status >= 500
+          ? "The sign-in service is unavailable. Check the local database and authentication configuration."
+          : "Sign-in failed. Check your email and password."));
+        return;
+      }
+      window.location.reload();
+    } catch {
+      setNotice("Could not reach the sign-in service. Check that the local app is running and try again.");
+    }
   }
 
   async function loadTab(value = tab): Promise<boolean> {
