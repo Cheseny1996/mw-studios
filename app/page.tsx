@@ -31,10 +31,19 @@ const events = [
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [registrationOpen, setRegistrationOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [accountMode, setAccountMode] = useState<"signin" | "signup">("signin");
+  const [authNotice, setAuthNotice] = useState("");
+  const [sessionUser, setSessionUser] = useState<{ name: string; email: string } | null>(null);
+  const [authAfter, setAuthAfter] = useState<"challenge" | "event" | null>(null);
   const [challengeNotice, setChallengeNotice] = useState("");
   const [registeredCount, setRegisteredCount] = useState(0);
   const [contestants, setContestants] = useState<Array<{ _id: string; stageName?: string; fullName: string; category: string; entryTitle: string; photograph?: string; voteCount?: number }>>([]);
   useEffect(() => {
+    fetch("/api/auth/session")
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => setSessionUser(data?.user ?? null))
+      .catch(() => setSessionUser(null));
     fetch("/api/jishindie/challenge")
       .then((response) => response.ok ? response.json() : null)
       .then((data) => {
@@ -80,11 +89,51 @@ export default function Home() {
     form.reset();
   }
 
+  async function submitAccount(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const payload = Object.fromEntries(new FormData(form));
+    setAuthNotice(accountMode === "signin" ? "Signing in..." : "Creating your account...");
+    const response = await fetch(`/api/auth/${accountMode === "signin" ? "login" : "register"}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      setAuthNotice(data.error || "Account action could not be completed.");
+      return;
+    }
+    setSessionUser(data.user);
+    setAccountOpen(false);
+    setAuthNotice("");
+    if (authAfter === "challenge") {
+      setRegistrationOpen(true);
+      setChallengeNotice("Signed in. Complete your challenge registration below.");
+    }
+    if (authAfter === "event") {
+      document.querySelector("#events")?.scrollIntoView({ behavior: "smooth" });
+      setChallengeNotice("Signed in. Select Register Now on an event to continue.");
+    }
+    setAuthAfter(null);
+  }
+
+  function openChallengeRegistration() {
+    if (sessionUser) {
+      setRegistrationOpen(true);
+      return;
+    }
+    setAuthAfter("challenge");
+    setAccountMode("signup");
+    setAuthNotice("");
+    setAccountOpen(true);
+  }
+
   async function voteForContestant(contestantId: string) {
     const voterId = localStorage.getItem("mw_jishindie_voter");
     if (!voterId) {
       setChallengeNotice("Register for the challenge before voting for a contestant.");
-      setRegistrationOpen(true);
+      openChallengeRegistration();
       return;
     }
     const response = await fetch("/api/jishindie/challenge/vote", {
@@ -120,10 +169,46 @@ export default function Home() {
         <nav className={menuOpen ? "mw-nav open" : "mw-nav"} aria-label="Primary navigation">
           {nav.map(([label, href]) => <a key={href} href={href} onClick={() => setMenuOpen(false)}>{label}</a>)}
         </nav>
+        <button className="mw-account-button" onClick={() => {
+          setAccountMode("signin");
+          setAuthAfter(null);
+          setAccountOpen(true);
+        }}>{sessionUser ? sessionUser.name.split(" ")[0] : "Sign in"}</button>
         <button className="mw-menu" aria-label="Toggle navigation" aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}>
           <span /><span /><span />
         </button>
       </header>
+
+      {accountOpen && (
+        <div className="challenge-modal-backdrop" role="presentation" onMouseDown={(event) => {
+          if (event.currentTarget === event.target) setAccountOpen(false);
+        }}>
+          <div className="challenge-modal account-modal" role="dialog" aria-modal="true" aria-labelledby="account-title">
+            <button className="modal-close" aria-label="Close account panel" onClick={() => setAccountOpen(false)}>×</button>
+            <span className="live-pill">MW STUDIOS ACCOUNT</span>
+            <div className="account-tabs">
+              <button className={accountMode === "signin" ? "active" : ""} onClick={() => { setAccountMode("signin"); setAuthNotice(""); }}>Sign in</button>
+              <button className={accountMode === "signup" ? "active" : ""} onClick={() => { setAccountMode("signup"); setAuthNotice(""); }}>Create account</button>
+            </div>
+            <h2 id="account-title">{accountMode === "signin" ? "Welcome back" : "Create your account"}</h2>
+            <p>{accountMode === "signin" ? "Sign in with your email and password." : "Register with your name, email, phone and password."}</p>
+            <form onSubmit={submitAccount}>
+              <div className="form-grid">
+                {accountMode === "signup" && (
+                  <>
+                    <label className="full-field">Full name<input name="fullName" required minLength={2} maxLength={100} /></label>
+                    <label>Phone number<input name="phone" type="tel" required minLength={7} maxLength={32} /></label>
+                  </>
+                )}
+                <label className={accountMode === "signup" ? "full-field" : "full-field"}>Email address<input name="email" type="email" required maxLength={254} /></label>
+                <label className="full-field">Password<input name="password" type="password" required minLength={12} maxLength={128} /></label>
+              </div>
+              <button className="submit-registration" type="submit">{accountMode === "signin" ? "Sign in" : "Create account"}</button>
+            </form>
+            {authNotice && <p className="challenge-notice" role="status">{authNotice}</p>}
+          </div>
+        </div>
+      )}
 
       <main>
         <section className="mw-hero" id="home">
@@ -189,7 +274,15 @@ export default function Home() {
             {events.map(([title, date, time, location, copy, attendees], index) => (
               <article className="event-card" key={title}>
                 <div className={`event-art event-art-${index}`}><span>{date.split(", ")[0]}</span></div>
-                <div className="card-body"><h3>{title}</h3><p>{copy}</p><ul><li>▣ {date}</li><li>◷ {time}</li><li>⌖ {location}</li><li>♙ {attendees} attendees registered</li></ul><a className="event-email-action" href={`mailto:info@mzimawellsstudios.com?subject=${encodeURIComponent(`Event registration: ${title}`)}`}>Register by email</a></div>
+                <div className="card-body"><h3>{title}</h3><p>{copy}</p><ul><li>▣ {date}</li><li>◷ {time}</li><li>⌖ {location}</li><li>♙ {attendees} attendees registered</li></ul><button className="event-email-action" onClick={() => {
+                  if (!sessionUser) {
+                    setAuthAfter("event");
+                    setAccountMode("signup");
+                    setAccountOpen(true);
+                  } else {
+                    setChallengeNotice(`Registration for "${title}" is ready for your account.`);
+                  }
+                }}>Register for event</button></div>
               </article>
             ))}
           </div>
@@ -205,7 +298,7 @@ export default function Home() {
           <div className="section-title jishindie-heading"><span className="live-pill">THIS WEEK'S CHALLENGE</span><h2>Jishindie Challenge</h2><p>Register. Create. Compete. Get voted. Win MzimaWells prizes.</p></div>
           <div className="challenge-banner">
             <div><span>WEEKLY CREATOR CHALLENGE</span><h3>Show your talent. Become a fan favourite.</h3><p>Open to artists, dancers, filmmakers, comedians, fashion creators and digital storytellers.</p></div>
-            <button onClick={() => setRegistrationOpen(true)}>Register to compete <b>→</b></button>
+            <button onClick={openChallengeRegistration}>Register to compete <b>→</b></button>
           </div>
           <div className="stats">
             {[String(registeredCount), "3", "3", "KSH Prizes"].map((value, index) => <div key={index}><strong>{value}</strong><span>{["Registered creators", "Prize tiers", "Ways to vote", "Rewards"][index]}</span></div>)}
@@ -236,7 +329,7 @@ export default function Home() {
           <div className="steps">
             {[["Register", "Sign up during the open period."], ["Create", "Develop content following the theme and guidelines."], ["Submit", "Upload your submission before the deadline."], ["Win", "Top entries receive prizes and industry opportunities."]].map(([title, copy], index) => <article key={title}><b>{index + 1}</b><div><h4>{title}</h4><p>{copy}</p></div></article>)}
           </div>
-          <button className="register-button" onClick={() => setRegistrationOpen(true)}>Register for the challenge</button>
+          <button className="register-button" onClick={openChallengeRegistration}>Register for the challenge</button>
           {challengeNotice && <p className="challenge-notice" role="status">{challengeNotice}</p>}
         </section>
 
@@ -278,10 +371,23 @@ export default function Home() {
 
         <section className="mw-section team-section" id="team">
           <div className="section-title"><h2>Our Team</h2><p>Meet the creative minds behind MzimaWells Studios</p></div>
-          <div className="team-crew">Creative Collective</div>
+          <img className="team-crew-photo" src="/crew/mzima-wells-crew.jpeg" alt="MzimaWells Studios crew" />
           <h3 className="subheading">Leadership Team</h3>
           <div className="team-grid">
-            {[["Elliot Cheseny", "MzimaWells Team"]].map(([name, role]) => <article key={name}><div className="team-photo team-photo-supplied" /><h4>{name}</h4><strong>{role}</strong></article>)}
+            {[
+              ["Dokta Will", "Creative Director", "/crew/dokta-will.jpeg"],
+              ["Director Brian K", "Production Director", "/crew/director-brian-k.jpeg"],
+              ["Director Abel Kibet", "Content Director", "/crew/director-abel-kibet.jpeg"],
+              ["Duke Of Nomcity", "Technical Director", "/crew/director-duke-of-nomcity.jpeg"],
+            ].map(([name, role, photo]) => <article key={name}><img className="team-photo-real" src={photo} alt={name} /><h4>{name}</h4><strong>{role}</strong></article>)}
+          </div>
+          <h3 className="subheading">Creative Team</h3>
+          <div className="team-grid">
+            {[
+              ["Academician Kibet OGW", "Creative Team", "/crew/academician-kibet.jpeg"],
+              ["Ann Cheroo", "Creative Team", "/crew/ann-cheroo.jpeg"],
+              ["Caleb Junior", "Creative Team", "/crew/caleb-junior.jpeg"],
+            ].map(([name, role, photo]) => <article key={name}><img className="team-photo-real" src={photo} alt={name} /><h4>{name}</h4><strong>{role}</strong></article>)}
           </div>
           <div className="join-team"><h3>Join Our Team</h3><p>We are always looking for filmmakers, editors, content creators, and creative professionals who want to make an impact.</p><a className="join-team-link" href="mailto:info@mzimawellsstudios.com?subject=Careers%20at%20MzimaWells%20Studios">Ask About Opportunities</a></div>
         </section>
