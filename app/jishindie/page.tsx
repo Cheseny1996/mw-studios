@@ -9,7 +9,7 @@ export default function JishindiePage() {
   useEffect(()=>{fetch("/api/jishindie/challenge").then(r=>r.ok?r.json():null).then(d=>{if(d){setRegistered(d.registered||0);setContestants(d.contestants||[])}}).catch(()=>undefined)},[]);
   return (
     <main className="inner-page">
-      <header className="inner-page-header"><Link href="/" className="inner-brand">MzimaWells Studios</Link><Link href="/">← Back to home</Link></header>
+      <header className="inner-page-header"><Link href="/" className="inner-brand"><span>MzimaWells</span> Studios</Link><Link href="/">← Back to home</Link></header>
       <section className="inner-hero section-hero jishindie-hero"><span>WEEKLY CREATOR CHALLENGE</span><h1>Register. Create.<br/>Compete. Get voted.</h1></section>
       <section className="route-content">
         <div className="route-intro"><span>JISHINDIE</span><h2>Show your talent to the world.</h2><p>Open to artists, dancers, filmmakers, fashion creators, comedians, and digital storytellers. Create, submit, and receive votes from the community.</p></div>

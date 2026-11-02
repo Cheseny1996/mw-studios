@@ -15,7 +15,7 @@ export default function TeamPage() {
   ];
   return (
     <main className="inner-page">
-      <header className="inner-page-header"><Link href="/" className="inner-brand">MzimaWells Studios</Link><Link href="/">← Back to home</Link></header>
+      <header className="inner-page-header"><Link href="/" className="inner-brand"><span>MzimaWells</span> Studios</Link><Link href="/">← Back to home</Link></header>
       <section className="inner-hero section-hero team-hero"><span>THE PEOPLE</span><h1>Meet the minds behind<br/>MzimaWells.</h1></section>
       <section className="route-content">
         <Image className="team-page-photo" src="/crew/mzima-wells-crew.jpeg" alt="MzimaWells Studios crew" width={1400} height={900} priority />

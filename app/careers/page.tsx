@@ -18,7 +18,7 @@ export default function CareersPage() {
   }, []);
   return (
     <main className="inner-page">
-      <header className="inner-page-header"><Link href="/" className="inner-brand">MzimaWells Studios</Link><Link href="/">← Back to home</Link></header>
+      <header className="inner-page-header"><Link href="/" className="inner-brand"><span>MzimaWells</span> Studios</Link><Link href="/">← Back to home</Link></header>
       <section className="inner-hero careers-hero"><span>BUILD WITH US</span><h1>Careers at MzimaWells</h1><p>Help tell stories that inspire, educate, and move communities forward.</p></section>
       <section className="careers-content"><div className="careers-intro"><span>OPEN OPPORTUNITIES</span><h2>Find your place in the story.</h2></div>
         <div className="opportunity-list">{opportunities.map((item) => (

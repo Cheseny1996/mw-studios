@@ -12,7 +12,7 @@ const episodes = [
 export default function PodcastPage() {
   return (
     <main className="inner-page">
-      <header className="inner-page-header"><Link href="/" className="inner-brand">MzimaWells Studios</Link><Link href="/">← Back to home</Link></header>
+      <header className="inner-page-header"><Link href="/" className="inner-brand"><span>MzimaWells</span> Studios</Link><Link href="/">← Back to home</Link></header>
       <section className="inner-hero section-hero podcast-hero"><span>K-RUN PODCAST</span><h1>Conversations that inspire,<br/>educate and entertain.</h1></section>
       <section className="route-content"><div className="route-title"><span>EPISODES</span><h2>The latest conversations</h2></div><div className="episodes-list">{episodes.map(([title,date,duration],index)=><article key={title}><span className="episode-number">{String(index+1).padStart(2,"0")}</span><div><time>{date}</time><h3>{title}</h3></div><b>{duration}</b></article>)}</div></section>
     </main>

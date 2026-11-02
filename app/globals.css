@@ -429,3 +429,234 @@ button { font-family:inherit; cursor:pointer; }
   .mw-hero p { margin:14px 0 20px; }
   .hero-actions a { width:auto; min-width:180px; }
 }
+
+/* Reference design system applied across every public page */
+:root {
+  --reference-orange: #f4511e;
+  --reference-orange-dark: #df4315;
+  --reference-navy: #172033;
+  --reference-white: #ffffff;
+}
+
+body,
+.inner-page,
+.admin-shell {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.mw-header,
+.inner-page-header {
+  height:74px;
+  background:#fff !important;
+  border-bottom:1px solid rgba(23,32,51,.08);
+  box-shadow:none;
+}
+
+.mw-brand h1,
+.inner-brand {
+  color:var(--reference-navy) !important;
+  letter-spacing:-.7px;
+}
+
+.mw-brand h1 span,
+.inner-brand span {
+  color:var(--reference-orange) !important;
+}
+
+.mw-nav {
+  gap:34px;
+}
+
+.mw-nav a,
+.inner-page-header a {
+  color:var(--reference-navy) !important;
+  font-weight:800;
+}
+
+.mw-nav a:hover,
+.inner-page-header a:hover {
+  color:var(--reference-orange) !important;
+}
+
+.mw-account-button {
+  color:var(--reference-orange) !important;
+  border-color:var(--reference-orange) !important;
+}
+
+.mw-hero,
+.inner-hero,
+.blog-hero,
+.careers-hero,
+.podcast-hero,
+.about-hero,
+.team-hero,
+.events-hero,
+.jishindie-hero,
+.section-hero {
+  background:var(--reference-orange) !important;
+  color:#fff !important;
+}
+
+.inner-hero {
+  min-height:350px !important;
+  align-items:flex-start;
+  justify-content:center;
+  text-align:left;
+}
+
+.inner-hero>span,
+.route-intro>span,
+.route-title>span,
+.route-kicker,
+.careers-intro>span,
+.careers-list article>span,
+.opportunity-meta a,
+.story-back,
+.story-page time,
+.blog-card time,
+.episode-number,
+.inline-action,
+.join-team-link,
+.join-team-page>span {
+  color:var(--reference-orange) !important;
+}
+
+.inner-hero>span {
+  color:#fff !important;
+  opacity:.82;
+}
+
+.inner-hero h1 {
+  color:#fff !important;
+}
+
+.hero-actions a,
+.hero-actions .hero-secondary,
+.route-cta,
+.route-button,
+.apply-button,
+.story-cta,
+.join-team-page a,
+.register-button,
+.challenge-banner button,
+.submit-registration,
+.vote-row button,
+.podcast-actions button,
+.event-card button,
+.title-actions a,
+.title-actions button,
+.admin-form button {
+  background:#fff !important;
+  border-color:#fff !important;
+  color:var(--reference-orange) !important;
+}
+
+.route-cta,
+.route-button,
+.apply-button,
+.story-cta,
+.join-team-page a,
+.register-button {
+  color:var(--reference-white) !important;
+  background:var(--reference-orange) !important;
+  border:0 !important;
+}
+
+.what-section>h2,
+.mw-section>h2,
+.route-content h2,
+.route-intro h2,
+.careers-intro h2,
+.story-page h1,
+.opportunity-page h1,
+.blog-card h2 {
+  color:var(--reference-navy) !important;
+}
+
+.what-grid .what-card:hover,
+.what-grid .what-card:focus-visible {
+  border-color:var(--reference-orange);
+  box-shadow:0 14px 34px rgba(244,81,30,.16);
+}
+
+.what-icon,
+.what-card-action,
+.mw-nav a:hover,
+.live-pill,
+.contestant-card>span,
+.stats strong,
+.stats b,
+.winners span,
+.journey b,
+.careers-list article>span,
+.opportunity-meta a {
+  color:var(--reference-orange) !important;
+}
+
+.live-pill {
+  background:#fff0eb !important;
+}
+
+.challenge-banner {
+  background:var(--reference-orange) !important;
+}
+
+.challenge-banner div>span {
+  color:#fff !important;
+}
+
+.challenge-banner p {
+  color:#fff !important;
+}
+
+.card-art,
+.podcast-art,
+.event-art,
+.past-art,
+.winner-art,
+.story-art,
+.prize-art,
+.contestant-avatar,
+.route-event-art,
+.route-image,
+.team-page-photo,
+.blog-cover,
+.story-cover,
+.card-art-0,.card-art-1,.card-art-2,.card-art-3,.card-art-4,.card-art-5,
+.podcast-art-1,.podcast-art-2,.podcast-art-3,.podcast-art-4,.podcast-art-5,
+.winner-1,.winner-2,.winner-3,.winner-4,.winner-5,.winner-6,
+.team-photo-1,.team-photo-2,.team-photo-3,
+.event-art-0,.event-art-1,.event-art-2,.event-art-3,
+.past-art-0,.past-art-1,.past-art-2,
+.event-tone-1,.event-tone-2 {
+  background:var(--reference-orange) !important;
+  color:#fff !important;
+}
+
+.admin-sidebar {
+  background:var(--reference-navy) !important;
+}
+
+.admin-brand,
+.admin-main header span,
+.admin-overview article>span,
+.admin-overview article button {
+  color:var(--reference-orange) !important;
+}
+
+.admin-sidebar nav button.active {
+  background:var(--reference-orange) !important;
+  color:#fff !important;
+}
+
+@media (max-width:900px) {
+  .mw-nav {
+    gap:0;
+  }
+  .mw-header,
+  .inner-page-header {
+    height:68px;
+    padding-left:20px;
+    padding-right:20px;
+  }
+}

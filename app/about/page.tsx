@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function AboutPage() {
   return (
     <main className="inner-page">
-      <header className="inner-page-header"><Link href="/" className="inner-brand">MzimaWells Studios</Link><Link href="/">← Back to home</Link></header>
+      <header className="inner-page-header"><Link href="/" className="inner-brand"><span>MzimaWells</span> Studios</Link><Link href="/">← Back to home</Link></header>
       <section className="inner-hero section-hero about-hero"><span>OUR STORY</span><h1>Changing the narrative<br/>through African stories.</h1></section>
       <section className="route-content">
         <div className="route-intro"><span>ABOUT US</span><h2>Creativity with purpose.</h2><p>MzimaWells Studios is a full-service creative content studio dedicated to telling authentic African stories through video, podcasting, music, digital media, and live experiences.</p></div>

@@ -24,13 +24,13 @@ function StoryContent() {
   let post: { title: string; excerpt?: string; subtitle?: string; body?: string; publishedAt?: Date | string } | null = null;
   post = livePost;
   const fallback = fallbackStories[slug];
-  if (!post && !fallback) return <main className="inner-page"><header className="inner-page-header"><Link href="/" className="inner-brand">MzimaWells Studios</Link><Link href="/blog">← All stories</Link></header><article className="story-page"><h1>Story not found</h1><Link className="story-cta" href="/blog">Browse the journal</Link></article></main>;
+  if (!post && !fallback) return <main className="inner-page"><header className="inner-page-header"><Link href="/" className="inner-brand"><span>MzimaWells</span> Studios</Link><Link href="/blog">← All stories</Link></header><article className="story-page"><h1>Story not found</h1><Link className="story-cta" href="/blog">Browse the journal</Link></article></main>;
   const story = post || fallback;
   const paragraphs = String(post?.body || fallback?.body || story?.excerpt || "").split(/\n\n+/);
 
   return (
     <main className="inner-page">
-      <header className="inner-page-header"><Link href="/" className="inner-brand">MzimaWells Studios</Link><Link href="/blog">← All stories</Link></header>
+      <header className="inner-page-header"><Link href="/" className="inner-brand"><span>MzimaWells</span> Studios</Link><Link href="/blog">← All stories</Link></header>
       <article className="story-page">
         <Link className="story-back" href="/blog">Journal</Link>
         <h1>{story.title}</h1>

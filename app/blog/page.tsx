@@ -21,7 +21,7 @@ export default function BlogPage() {
 
   return (
     <main className="inner-page">
-      <header className="inner-page-header"><Link href="/" className="inner-brand">MzimaWells Studios</Link><Link href="/">← Back to home</Link></header>
+      <header className="inner-page-header"><Link href="/" className="inner-brand"><span>MzimaWells</span> Studios</Link><Link href="/">← Back to home</Link></header>
       <section className="inner-hero blog-hero"><span>THE MW JOURNAL</span><h1>Ideas, people and stories<br/>shaping African creativity.</h1></section>
       <section className="blog-grid">
         {displayedPosts.map((post, index) => (
