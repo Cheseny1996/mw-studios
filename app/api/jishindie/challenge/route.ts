@@ -4,6 +4,41 @@ import crypto from "crypto";
 import { connectToDatabase } from "@/lib/db";
 import { ChallengeRegistrationModel, ChallengeVoteModel } from "@/lib/models";
 
+export function getJishindieSchedule(now = new Date()) {
+  const shifted = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+  const year = shifted.getUTCFullYear();
+  const month = shifted.getUTCMonth();
+  const date = shifted.getUTCDate();
+  const day = shifted.getUTCDay();
+  const hour = shifted.getUTCHours();
+  const minute = shifted.getUTCMinutes();
+
+  const elapsedMinutes = hour * 60 + minute;
+  let daysUntilSunday = (7 - day) % 7;
+  if (day === 0 && elapsedMinutes < 21 * 60) daysUntilSunday = 0;
+
+  const sunday = Date.UTC(year, month, date + daysUntilSunday);
+  const registrationEndsAt = new Date(sunday + 8 * 60 * 60 * 1000 - 3 * 60 * 60 * 1000);
+  const votingEndsAt = new Date(sunday + 21 * 60 * 60 * 1000 - 3 * 60 * 60 * 1000);
+
+  let status: "registration" | "voting" | "closed" = "registration";
+  if (now.getTime() >= registrationEndsAt.getTime() && now.getTime() < votingEndsAt.getTime()) status = "voting";
+  if (now.getTime() >= votingEndsAt.getTime()) status = "closed";
+
+  return {
+    timezone: "Africa/Nairobi (EAT)",
+    status,
+    registrationEndsAt: registrationEndsAt.toISOString(),
+    votingStartsAt: registrationEndsAt.toISOString(),
+    votingEndsAt: votingEndsAt.toISOString(),
+    nextAnnouncement: status === "registration"
+      ? "Registration closes Sunday at 8:00 AM EAT. Voting opens immediately."
+      : status === "voting"
+        ? "Voting is live until Sunday at 9:00 PM EAT."
+        : "The challenge is complete. The next Sunday challenge opens for registration.",
+  };
+}
+
 export async function GET(request: NextRequest) {
   await connectToDatabase();
   const slug = request.nextUrl.searchParams.get("challenge") || "weekly-jishindie";
@@ -19,6 +54,7 @@ export async function GET(request: NextRequest) {
   ]);
   const voteTotals = new Map(totals.map((row: { _id: unknown; votes: number }) => [String(row._id), row.votes]));
   return NextResponse.json({
+    schedule: getJishindieSchedule(),
     challenge: {
       slug,
       title: "Weekly Jishindie Challenge",
@@ -34,7 +70,7 @@ export async function GET(request: NextRequest) {
       ...entry,
       voteCount: voteTotals.get(String(entry._id)) ?? 0,
     })),
-  }, { headers: { "Cache-Control": "public, s-maxage=10, stale-while-revalidate=30" } });
+  }, { headers: { "Cache-Control": "no-store, max-age=0" } });
 }
 
 const registrationSchema = z.object({
@@ -55,6 +91,14 @@ export async function POST(request: NextRequest) {
   const parsed = registrationSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Invalid registration details." }, { status: 400 });
+  }
+  const schedule = getJishindieSchedule();
+  if (schedule.status !== "registration") {
+    return NextResponse.json({
+      error: schedule.status === "voting"
+        ? "Registration has closed. Voting is now live."
+        : "Registration for this challenge has ended.",
+    }, { status: 409 });
   }
   await connectToDatabase();
   try {

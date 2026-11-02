@@ -67,19 +67,29 @@ export default function Home() {
   const [selectedNews, setSelectedNews] = useState<string | null>(null);
   const [registeredCount, setRegisteredCount] = useState(0);
   const [contestants, setContestants] = useState<Array<{ _id: string; stageName?: string; fullName: string; category: string; entryTitle: string; photograph?: string; voteCount?: number }>>([]);
+  const [challengeSchedule, setChallengeSchedule] = useState<{status:string;registrationEndsAt:string;votingEndsAt:string;nextAnnouncement:string}|null>(null);
+  const [challengeNow, setChallengeNow] = useState(0);
   useEffect(() => {
+    setChallengeNow(Date.now());
     fetch("/api/auth/session")
       .then((response) => response.ok ? response.json() : null)
       .then((data) => setSessionUser(data?.user ?? null))
       .catch(() => setSessionUser(null));
-    fetch("/api/jishindie/challenge")
-      .then((response) => response.ok ? response.json() : null)
-      .then((data) => {
-        if (!data) return;
-        setRegisteredCount(data.registered ?? 0);
-        setContestants(data.contestants ?? []);
-      })
-      .catch(() => undefined);
+    const refreshChallenge=()=>{
+      fetch("/api/jishindie/challenge",{cache:"no-store"})
+        .then((response) => response.ok ? response.json() : null)
+        .then((data) => {
+          if (!data) return;
+          setRegisteredCount(data.registered ?? 0);
+          setContestants(data.contestants ?? []);
+          setChallengeSchedule(data.schedule ?? null);
+        })
+        .catch(() => undefined);
+    };
+    refreshChallenge();
+    const challengeDataTimer=window.setInterval(refreshChallenge,5000);
+    const challengeClockTimer=window.setInterval(()=>setChallengeNow(Date.now()),1000);
+    return()=>{window.clearInterval(challengeDataTimer);window.clearInterval(challengeClockTimer)};
   }, []);
 
   async function registerForChallenge(event: FormEvent<HTMLFormElement>) {
@@ -183,6 +193,11 @@ export default function Home() {
     ["About", "/about"],
     ["Team", "/team"],
   ];
+  const countdownTarget=challengeSchedule?.status==="registration"
+    ?challengeSchedule.registrationEndsAt
+    :challengeSchedule?.status==="voting"?challengeSchedule.votingEndsAt:null;
+  const countdownRemaining=countdownTarget?Math.max(0,new Date(countdownTarget).getTime()-challengeNow):0;
+  const countdown=[Math.floor(countdownRemaining/86400000),Math.floor((countdownRemaining%86400000)/3600000),Math.floor((countdownRemaining%3600000)/60000),Math.floor((countdownRemaining%60000)/1000)];
 
   return (
     <div className="mw-site">
@@ -293,6 +308,10 @@ export default function Home() {
             <div><span>WEEKLY CREATOR CHALLENGE</span><h3>Show your talent. Become a fan favourite.</h3><p>Open to artists, dancers, filmmakers, comedians, fashion creators and digital storytellers.</p></div>
             <button onClick={openChallengeRegistration}>Register to compete <b>→</b></button>
           </div>
+          <div className="challenge-live-panel">
+            <div><span className="live-pill">{challengeSchedule?.status==="voting"?"LIVE VOTING":challengeSchedule?.status==="closed"?"CHALLENGE CLOSED":"REGISTRATION OPEN"}</span><h3>{challengeSchedule?.status==="voting"?"Voting closes in":challengeSchedule?.status==="registration"?"Registration closes in":"Next challenge countdown"}</h3><p>{challengeSchedule?.nextAnnouncement||"Loading challenge schedule..."}</p></div>
+            <div className="countdown">{["Days","Hours","Minutes","Seconds"].map((label,index)=><div key={label}><strong>{String(countdown[index]).padStart(2,"0")}</strong><span>{label}</span></div>)}</div>
+          </div>
           <div className="stats">
             {[String(registeredCount), "KSH 100", "3", "Sunday"].map((value, index) => <div key={index}><strong>{value}</strong><span>{["Registered creators", "Registration fee", "Ways to vote", "Challenge day"][index]}</span></div>)}
           </div>
@@ -317,7 +336,7 @@ export default function Home() {
                   <span>{contestant.category}</span>
                   <h4>{contestant.stageName || contestant.fullName}</h4>
                   <p>{contestant.entryTitle}</p>
-                  <div className="vote-row"><strong>{contestant.voteCount ?? 0} votes</strong><button onClick={() => voteForContestant(contestant._id)}>Vote</button></div>
+                  <div className="vote-row"><strong>{contestant.voteCount ?? 0} votes</strong><button onClick={() => voteForContestant(contestant._id)} disabled={challengeSchedule?.status==="registration"}>{challengeSchedule?.status==="registration"?"Voting opens Sunday 8 AM":"Vote"}</button></div>
                 </article>
               ))}
             </div>

@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { z } from "zod";
 import { connectToDatabase } from "@/lib/db";
 import { ChallengeRegistrationModel, ChallengeVoteModel } from "@/lib/models";
+import { getJishindieSchedule } from "../route";
 
 const schema = z.object({
   contestantId: z.string().min(1),
@@ -12,6 +13,14 @@ const schema = z.object({
 export async function POST(request: NextRequest) {
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Choose a contestant before voting." }, { status: 400 });
+  const schedule = getJishindieSchedule();
+  if (schedule.status !== "voting") {
+    return NextResponse.json({
+      error: schedule.status === "registration"
+        ? "Voting opens Sunday at 8:00 AM EAT after registration closes."
+        : "Voting has ended for this challenge.",
+    }, { status: 409 });
+  }
   await connectToDatabase();
   let voterId = parsed.data.voterId || request.headers.get("x-mzima-voter-id");
   if (!voterId) {
