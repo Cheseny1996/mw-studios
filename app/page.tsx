@@ -84,6 +84,23 @@ export default function Home() {
     return()=>{window.clearInterval(challengeDataTimer);window.clearInterval(challengeClockTimer)};
   }, []);
 
+  useEffect(() => {
+    if (!loginMenuOpen) return;
+    const closeOnOutsideClick = (event: PointerEvent) => {
+      const target = event.target as Element | null;
+      if (!target?.closest(".mw-login-menu")) setLoginMenuOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setLoginMenuOpen(false);
+    };
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [loginMenuOpen]);
+
   async function registerForChallenge(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
