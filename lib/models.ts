@@ -8,7 +8,7 @@ export interface UserRecord {
   email: string;
   phone: string;
   passwordHash: string;
-  role: "member" | "super_admin" | "admin" | "content_editor" | "event_manager" | "election_manager" | "shop_manager" | "finance_manager";
+  role: "member" | "super_admin" | "admin" | "content_editor" | "event_manager" | "communications" | "hr_manager" | "election_manager" | "shop_manager" | "finance_manager";
   emailVerified: boolean;
   phoneVerified: boolean;
   voterId?: string;
@@ -82,6 +82,48 @@ const ContentSchema = new Schema({
 }, { timestamps: true });
 
 export const ContentModel = models.Content ?? mongoose.model("Content", ContentSchema);
+
+const StudioEventSchema = new Schema({
+  slug: { type: String, required: true, unique: true },
+  title: { type: String, required: true },
+  excerpt: { type: String, default: "" },
+  description: { type: String, default: "" },
+  date: { type: Date, required: true },
+  endDate: Date,
+  time: { type: String, default: "" },
+  location: { type: String, default: "" },
+  image: { type: String, default: "" },
+  status: { type: String, enum: ["draft", "published", "cancelled", "archived"], default: "draft" },
+  capacity: { type: Number, default: 0 },
+  registrationCount: { type: Number, default: 0 },
+}, { timestamps: true });
+
+export const StudioEventModel = models.StudioEvent ?? mongoose.model("StudioEvent", StudioEventSchema);
+
+const OpportunitySchema = new Schema({
+  slug: { type: String, required: true, unique: true },
+  title: { type: String, required: true },
+  department: { type: String, enum: ["hr", "creative", "production", "communications", "events", "technology", "other"], default: "other" },
+  location: { type: String, default: "Nairobi, Kenya" },
+  employmentType: { type: String, default: "Full-time" },
+  summary: { type: String, default: "" },
+  description: { type: String, default: "" },
+  requirements: { type: String, default: "" },
+  status: { type: String, enum: ["draft", "published", "closed"], default: "draft" },
+  applicationEmail: { type: String, default: "careers@mzimawellsstudios.com" },
+  applicationUrl: { type: String, default: "" },
+}, { timestamps: true });
+
+export const OpportunityModel = models.Opportunity ?? mongoose.model("Opportunity", OpportunitySchema);
+
+const EventRegistrationSchema = new Schema({
+  eventId: { type: Schema.Types.ObjectId, ref: "StudioEvent", required: true },
+  userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  status: { type: String, enum: ["registered", "cancelled", "attended"], default: "registered" },
+}, { timestamps: true });
+EventRegistrationSchema.index({ eventId: 1, userId: 1 }, { unique: true });
+
+export const EventRegistrationModel = models.EventRegistration ?? mongoose.model("EventRegistration", EventRegistrationSchema);
 
 export const ChallengeRegistrationSchema = new Schema({
   challengeSlug: { type: String, required: true, index: true },

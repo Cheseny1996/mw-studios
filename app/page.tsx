@@ -61,12 +61,13 @@ export default function Home() {
   const [accountOpen, setAccountOpen] = useState(false);
   const [accountMode, setAccountMode] = useState<"signin" | "signup">("signin");
   const [authNotice, setAuthNotice] = useState("");
-  const [sessionUser, setSessionUser] = useState<{ name: string; email: string } | null>(null);
+  const [sessionUser, setSessionUser] = useState<{ name: string; email: string; role?: string } | null>(null);
   const [authAfter, setAuthAfter] = useState<"challenge" | "event" | null>(null);
   const [challengeNotice, setChallengeNotice] = useState("");
   const [selectedNews, setSelectedNews] = useState<string | null>(null);
   const [registeredCount, setRegisteredCount] = useState(0);
   const [contestants, setContestants] = useState<Array<{ _id: string; stageName?: string; fullName: string; category: string; entryTitle: string; photograph?: string; voteCount?: number }>>([]);
+  const [liveEvents, setLiveEvents] = useState<Array<{ _id: string; title: string; date: string; time?: string; location?: string; description?: string; excerpt?: string; registrationCount?: number }>>([]);
   useEffect(() => {
     fetch("/api/auth/session")
       .then((response) => response.ok ? response.json() : null)
@@ -80,6 +81,10 @@ export default function Home() {
         setContestants(data.contestants ?? []);
       })
       .catch(() => undefined);
+    fetch("/api/public/events")
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => setLiveEvents(data?.events ?? []))
+      .catch(() => setLiveEvents([]));
   }, []);
 
   async function registerForChallenge(event: FormEvent<HTMLFormElement>) {
@@ -179,10 +184,11 @@ export default function Home() {
   }
   const nav = [
     ["Home", "#home"],
-    ["News", "#news"],
+    ["Blog", "/blog"],
     ["K-Run Podcast", "#podcast"],
     ["Events", "#events"],
     ["Jishindie", "#jishindie"],
+    ["Careers", "/careers"],
     ["About", "#about"],
     ["Team", "#team"],
   ];
@@ -196,6 +202,7 @@ export default function Home() {
         </a>
         <nav className={menuOpen ? "mw-nav open" : "mw-nav"} aria-label="Primary navigation">
           {nav.map(([label, href]) => <a key={href} href={href} onClick={() => setMenuOpen(false)}>{label}</a>)}
+          {sessionUser?.role && ["super_admin", "admin", "content_editor", "event_manager", "communications", "hr_manager"].includes(sessionUser.role) && <a href="/admin">Admin</a>}
         </nav>
         <button className="mw-account-button" onClick={() => {
           setAccountMode("signin");
@@ -256,10 +263,13 @@ export default function Home() {
 
       <main>
         <section className="mw-hero" id="home">
-          <div>
-            <h2>Welcome to MzimaWells Studios</h2>
-            <p>Where Creativity Flows and Stories Come to Life</p>
-            <a href="#what-we-do">Explore Our Work</a>
+          <div className="hero-orbit hero-orbit-one" aria-hidden="true">01</div>
+          <div className="hero-orbit hero-orbit-two" aria-hidden="true">MW</div>
+          <div className="hero-content">
+            <span className="hero-kicker">STORIES • SOUND • CULTURE</span>
+            <h2><span>Welcome to</span> MzimaWells Studios</h2>
+            <p>Where creativity moves, African stories lead, and every voice can become a movement.</p>
+            <div className="hero-actions"><a href="#what-we-do">Explore our work</a><a href="/blog">Read our journal</a></div>
           </div>
         </section>
 
@@ -293,7 +303,7 @@ export default function Home() {
             {news.map(([title, date, copy, trending], index) => (
               <article className="news-card" key={title}>
                 <div className={`card-art art-${index}`}><span>MzimaWells</span>{trending && <b>Trending</b>}</div>
-                <div className="card-body"><time>{date}</time><h3>{title}</h3><p>{copy}</p><button className="inline-action" onClick={() => setSelectedNews(title)}>Read full story →</button></div>
+                <div className="card-body"><time>{date}</time><h3>{title}</h3><p>{copy}</p><a className="inline-action" href={`/blog/${title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`}>Read full story →</a></div>
               </article>
             ))}
           </div>
@@ -315,7 +325,15 @@ export default function Home() {
           <div className="section-title"><h2>Events</h2><p>Join us for exciting events and experiences</p></div>
           <h3 className="subheading">Upcoming Events</h3>
           <div className="events-grid">
-            {events.map(([title, date, time, location, copy, attendees], index) => (
+            {(liveEvents.length ? liveEvents.map((event, index) => ({
+              title: event.title,
+              date: new Date(event.date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }),
+              time: event.time || "Time to be confirmed",
+              location: event.location || "MzimaWells Studios, Nairobi",
+              copy: event.description || event.excerpt || "Join us for an upcoming MzimaWells Studios experience.",
+              attendees: event.registrationCount || 0,
+              eventId: event._id,
+            })) : events.map(([title, date, time, location, copy, attendees], index) => ({ title, date, time, location, copy, attendees, eventId: "" }))).map(({ title, date, time, location, copy, attendees, eventId }, index) => (
               <article className="event-card" key={title}>
                 <div className={`event-art event-art-${index}`}><span>{date.split(", ")[0]}</span></div>
                 <div className="card-body"><h3>{title}</h3><p>{copy}</p><ul><li>▣ {date}</li><li>◷ {time}</li><li>⌖ {location}</li><li>♙ {attendees} attendees registered</li></ul><button className="event-email-action" onClick={() => {
@@ -324,7 +342,9 @@ export default function Home() {
                     setAccountMode("signup");
                     setAccountOpen(true);
                   } else {
-                    setChallengeNotice(`Registration for "${title}" is ready for your account.`);
+                    if (!eventId) { setChallengeNotice(`Registration for "${title}" is ready for your account.`); return; }
+                    fetch("/api/events/register", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ eventId }) })
+                      .then(async (response) => { const data = await response.json().catch(() => ({})); setChallengeNotice(data.error || data.message || "Registration status unavailable."); });
                   }
                 }}>Register for event</button></div>
               </article>
@@ -433,7 +453,7 @@ export default function Home() {
               ["Caleb Junior", "Jishindie Winner", "/crew/caleb-junior.jpeg"],
             ].map(([name, role, photo]) => <article key={name}><img className="team-photo-real" src={photo} alt={name} /><h4>{name}</h4><strong>{role}</strong></article>)}
           </div>
-          <div className="join-team"><h3>Join Our Team</h3><p>We are always looking for filmmakers, editors, content creators, and creative professionals who want to make an impact.</p><a className="join-team-link" href="mailto:info@mzimawellsstudios.com?subject=Careers%20at%20MzimaWells%20Studios">Ask About Opportunities</a></div>
+          <div className="join-team"><h3>Join Our Team</h3><p>We are always looking for filmmakers, editors, content creators, and creative professionals who want to make an impact.</p><a className="join-team-link" href="/careers">View careers and opportunities</a></div>
         </section>
       </main>
 

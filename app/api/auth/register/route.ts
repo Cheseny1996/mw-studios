@@ -23,11 +23,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "An account with this email already exists." }, { status: 409 });
   }
   const passwordHash = await bcrypt.hash(parsed.data.password, 12);
+  const superAdminEmail = process.env.SUPER_ADMIN_EMAIL?.toLowerCase().trim();
   const user = await UserModel.create({
     ...parsed.data,
     email,
     passwordHash,
-    role: "member",
+    role: superAdminEmail && email === superAdminEmail ? "super_admin" : "member",
     emailVerified: false,
     status: "active",
   });
