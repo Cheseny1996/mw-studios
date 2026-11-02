@@ -1115,6 +1115,68 @@ select:focus-visible {
 .leaderboard-rank { position:absolute; right:14px; top:12px; color:#c59a3b; font-weight:900; }
 .contestant-card { position:relative; }
 
+.admin-login-form {
+  width:min(420px, 100%);
+  display:grid;
+  gap:10px;
+  margin:18px auto;
+}
+.admin-login-form input {
+  height:48px;
+  border:1px solid #d0d5dd;
+  border-radius:8px;
+  padding:0 14px;
+}
+.admin-login-form button {
+  height:48px;
+  border:0;
+  border-radius:8px;
+  background:#c59a3b;
+  color:#111827;
+  font-weight:900;
+}
+.admin-item-list {
+  max-width:760px;
+  display:grid;
+  gap:10px;
+  margin-top:18px;
+}
+.admin-item-list>div {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:12px 14px;
+  border:1px solid #e6e9ef;
+  border-radius:8px;
+}
+.admin-item-list p {
+  display:grid;
+  margin:0;
+}
+.admin-item-list p span {
+  margin-top:4px;
+  color:#667085;
+  font-size:12px;
+}
+.admin-item-list>div>div {
+  display:flex;
+  gap:8px;
+}
+.admin-item-list button {
+  min-height:38px;
+  border:1px solid #c59a3b;
+  border-radius:7px;
+  padding:0 12px;
+  background:#fff;
+  color:#6b531c;
+  font-weight:900;
+}
+.admin-item-list .danger-button {
+  border-color:#b42318;
+  color:#b42318;
+}
+
 @media (max-width:900px) {
   .registered-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .challenge-registration-form .challenge-form-grid { grid-template-columns:1fr; }

@@ -374,7 +374,7 @@ export default function Home() {
 
       <footer className="mw-footer">
         <div><h2>MzimaWells Studios</h2><p>Creating compelling content that inspires, entertains, and connects communities.</p></div>
-        <div><h3>Quick Links</h3>{nav.slice(0, 5).map(([label, href]) => <a key={href} href={href}>{label}</a>)}</div>
+        <div><h3>Quick Links</h3>{nav.slice(0, 5).map(([label, href]) => <a key={href} href={href}>{label}</a>)}<a href="/admin">Admin / Staff Login</a></div>
         <p className="copyright">© 2026 MzimaWells Studios. All rights reserved.</p>
       </footer>
     </div>

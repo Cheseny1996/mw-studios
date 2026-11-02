@@ -29,3 +29,28 @@ export async function POST(request: NextRequest) {
   );
   return NextResponse.json({ post }, { status: body.status === "published" ? 200 : 201 });
 }
+
+export async function PATCH(request: NextRequest) {
+  const session = await getSession();
+  if (!session || !canManagePosts(String(session.role))) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+  const body = await request.json().catch(() => null);
+  if (!body?.id || !body?.title) return NextResponse.json({ error: "Post ID and title are required." }, { status: 400 });
+  await connectToDatabase();
+  const slug = String(body.slug || body.title).toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const post = await ContentModel.findOneAndUpdate(
+    { _id: body.id, type: "post" },
+    { ...body, slug, type: "post", publishedAt: body.status === "published" ? new Date() : undefined },
+    { new: true, runValidators: true },
+  );
+  return post ? NextResponse.json({ post }) : NextResponse.json({ error: "Post not found." }, { status: 404 });
+}
+
+export async function DELETE(request: NextRequest) {
+  const session = await getSession();
+  if (!session || !canManagePosts(String(session.role))) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+  const id = request.nextUrl.searchParams.get("id");
+  if (!id) return NextResponse.json({ error: "Post ID is required." }, { status: 400 });
+  await connectToDatabase();
+  const post = await ContentModel.findOneAndDelete({ _id: id, type: "post" });
+  return post ? NextResponse.json({ message: "Post deleted." }) : NextResponse.json({ error: "Post not found." }, { status: 404 });
+}
