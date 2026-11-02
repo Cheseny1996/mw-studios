@@ -15,6 +15,9 @@ export default function JishindiePage() {
   const [registrationNotice,setRegistrationNotice] = useState("");
 
   useEffect(()=>{
+    if (new URLSearchParams(window.location.search).get("join")==="contestant") {
+      window.setTimeout(()=>setRegistrationOpen(true),0);
+    }
     setNow(Date.now());
     const refresh=()=>{
       fetch("/api/jishindie/challenge",{cache:"no-store"})

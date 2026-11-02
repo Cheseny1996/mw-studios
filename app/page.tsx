@@ -57,8 +57,8 @@ const events = [
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [loginMenuOpen, setLoginMenuOpen] = useState(false);
   const [registrationOpen, setRegistrationOpen] = useState(false);
-  const [sessionUser, setSessionUser] = useState<{ name: string; email: string; role?: string } | null>(null);
   const [challengeNotice, setChallengeNotice] = useState("");
   const [selectedNews, setSelectedNews] = useState<string | null>(null);
   const [registeredCount, setRegisteredCount] = useState(0);
@@ -67,10 +67,6 @@ export default function Home() {
   const [challengeNow, setChallengeNow] = useState(0);
   useEffect(() => {
     setChallengeNow(Date.now());
-    fetch("/api/auth/session")
-      .then((response) => response.ok ? response.json() : null)
-      .then((data) => setSessionUser(data?.user ?? null))
-      .catch(() => setSessionUser(null));
     const refreshChallenge=()=>{
       fetch("/api/jishindie/challenge",{cache:"no-store"})
         .then((response) => response.ok ? response.json() : null)
@@ -149,13 +145,13 @@ export default function Home() {
     }
   }
   const nav = [
-    ["Home", "#home"],
     ["Blog", "/blog"],
     ["Events", "/events"],
     ["Jishindie", "/jishindie"],
     ["Careers", "/careers"],
     ["About", "/about"],
     ["Team", "/team"],
+    ["Home", "#home"],
   ];
   const countdownTarget=challengeSchedule?.status==="registration"
     ?challengeSchedule.registrationEndsAt
@@ -172,8 +168,25 @@ export default function Home() {
         </a>
         <nav className={menuOpen ? "mw-nav open" : "mw-nav"} aria-label="Primary navigation">
           {nav.map(([label, href]) => <a key={href} href={href} onClick={() => setMenuOpen(false)}>{label}</a>)}
-          {sessionUser?.role && ["super_admin", "admin", "content_editor", "event_manager", "communications", "hr_manager"].includes(sessionUser.role) && <a href="/admin">Admin</a>}
         </nav>
+        <div className="mw-login-menu">
+          <button
+            className="mw-login-button"
+            type="button"
+            aria-haspopup="menu"
+            aria-expanded={loginMenuOpen}
+            onClick={() => setLoginMenuOpen((open) => !open)}
+          >
+            Login <span aria-hidden="true">⌄</span>
+          </button>
+          {loginMenuOpen && (
+            <div className="mw-login-dropdown" role="menu">
+              <a href="/admin" role="menuitem" onClick={() => setLoginMenuOpen(false)}>Login as Admin</a>
+              <a href="/jishindie" role="menuitem" onClick={() => setLoginMenuOpen(false)}>Login as Platform Fan</a>
+              <a href="/jishindie?join=contestant" role="menuitem" onClick={() => setLoginMenuOpen(false)}>Login as Contestant</a>
+            </div>
+          )}
+        </div>
         <button className="mw-menu" aria-label="Toggle navigation" aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}>
           <span /><span /><span />
         </button>
