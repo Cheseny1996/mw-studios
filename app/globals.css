@@ -995,3 +995,15 @@ select:focus-visible {
   transform:none;
   box-shadow:none;
 }
+
+.homepage-jishindie-link {
+  display:block;
+  width:max-content;
+  margin:14px auto 0;
+  color:#111827;
+  font-size:13px;
+  font-weight:900;
+  text-decoration:underline;
+  text-decoration-color:#c59a3b;
+  text-underline-offset:4px;
+}

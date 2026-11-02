@@ -4,9 +4,13 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const fallback = [
-  ["Plat4m Podcast Live Recording","January 22, 2025","7:00 PM - 9:00 PM","City Hall, Nairobi","Be part of a live podcast recording with special guests.","event"],
-  ["Jishindie Challenge Finals","February 5, 2025","4:00 PM - 8:00 PM","National Theatre, Nairobi","Watch the top finalists compete for the grand prize.","jishindie"],
-  ["Creative Minds Workshop","February 15, 2025","2:00 PM - 6:00 PM","MzimaWells Studios, Nairobi","Learn practical content creation and digital storytelling skills.","workshop"],
+  ["Kapsokwony Annual Run","Annual event","See event schedule","Kapsokwony, Kenya","The famous annual Kapsokwony Run community event.","event"],
+  ["Silas Chai Music Launch","November 2024","Date and venue details to be announced","Kenya","Silas Chai music launch event.","music"],
+  ["Arap Koko Music Launch","2025","Time to be confirmed","Kenya","Arap Koko music launch event.","music"],
+  ["Mbuzi Party","2025","Time to be confirmed","Nairobi, Kenya","Mbuzi Party in Nairobi.","party"],
+  ["Mbuzi Party","2026","Time to be confirmed","Nairobi, Kenya","Mbuzi Party in Nairobi.","party"],
+  ["Career Talk","Date to be announced","Time to be confirmed","Kapsokwony, Kenya","Career Talk and community guidance session.","career"],
+  ["Moses Kibe Music Launch","14 November 2026","Time to be confirmed","Kitum, Endebes, Kenya","Upcoming Moses Kibe music launch.","music"],
 ] as const;
 
 export default function EventsPage() {

@@ -4,7 +4,7 @@ import Image from "next/image";
 import { FormEvent, useEffect, useState } from "react";
 
 const news = [
-  ["MzimaWells Studios Launches New Podcast Series", "December 15, 2024", "Exciting new content coming your way with K-Run Podcast exploring stories from across the continent.", true],
+  ["Kapsokwony Annual Run Announced", "December 15, 2024", "MzimaWells Studios shares details for the famous annual Kapsokwony Run community event.", true],
   ["Jishindie Challenge Winners Announced", "December 10, 2024", "Congratulations to all the talented creators who participated in this season's competition.", true],
   ["Behind the Scenes: Latest Music Video Production", "December 5, 2024", "Take a look at our creative process for the latest music video project.", false],
   ["Community Outreach Program Success", "November 28, 2024", "Our recent community engagement initiative reached over 500 young creatives.", false],
@@ -13,9 +13,9 @@ const news = [
 ] as const;
 
 const newsStories: Record<string, string[]> = {
-  "MzimaWells Studios Launches New Podcast Series": [
-    "MzimaWells Studios has launched a new K-Run Podcast series focused on African entertainment, culture, creativity, and the people shaping meaningful conversations.",
-    "Each episode brings together artists, creators, producers, and community voices for practical discussions, personal stories, and fresh perspectives.",
+  "Kapsokwony Annual Run Announced": [
+    "The K-Run is MzimaWells Studios' event identity for the famous annual Kapsokwony Run.",
+    "Community updates, participating details, and event announcements will be published on the Events page.",
   ],
   "Jishindie Challenge Winners Announced": [
     "The latest Jishindie Challenge season has celebrated talented creators from across participating categories.",
@@ -186,7 +186,7 @@ export default function Home() {
   const nav = [
     ["Home", "#home"],
     ["Blog", "/blog"],
-    ["K-Run Podcast", "/podcast"],
+    ["Kapsokwony Run", "/events"],
     ["Events", "/events"],
     ["Jishindie", "/jishindie"],
     ["Careers", "/careers"],
@@ -283,7 +283,7 @@ export default function Home() {
           <div className="what-grid">
             {[
               ["▶", "Video Production", "Professional video production services for music videos, commercials, and documentaries.", "/about"],
-              ["●", "Podcasting", "K-Run Podcast brings you the latest in entertainment, culture, and inspiration.", "/podcast"],
+              ["●", "Kapsokwony Run", "The famous annual Kapsokwony community run, presented as the K-Run event.", "/events"],
               ["▣", "Events", "Creating memorable experiences through professional event coverage and management.", "/events"],
               ["♛", "Jishindie Challenge", "Empowering creators through our innovative creative competition platform.", "/jishindie"],
             ].map(([icon, title, copy, href]) => (
@@ -299,7 +299,7 @@ export default function Home() {
 
         <section className="mw-mission">
           <h2>Our Mission</h2>
-          <p>We believe in the power of storytelling to inspire, educate, and connect communities. We are committed to producing high-quality content that resonates with audiences and creates lasting impact.</p>
+          <p>Inspiring and connecting communities through authentic African stories.</p>
         </section>
 
         <section className="mw-section jishindie-section-page" id="jishindie">
@@ -315,43 +315,8 @@ export default function Home() {
           <div className="stats">
             {[String(registeredCount), "KSH 100", "3", "Sunday"].map((value, index) => <div key={index}><strong>{value}</strong><span>{["Registered creators", "Registration fee", "Ways to vote", "Challenge day"][index]}</span></div>)}
           </div>
-          <h3 className="subheading">Jishindie Winners</h3>
-          <div className="team-grid jishindie-winners-grid">
-            {[
-              ["Academician Kibet OGW", "Jishindie Winner", "/crew/academician-kibet.jpeg"],
-              ["Ann Cheroo", "Jishindie Winner", "/crew/ann-cheroo.jpeg"],
-              ["Caleb Junior", "Jishindie Winner", "/crew/caleb-junior.jpeg"],
-            ].map(([name, role, photo]) => <article key={name}><img className="team-photo-real" src={photo} alt={name} /><h4>{name}</h4><strong>{role}</strong></article>)}
-          </div>
-          <h3 className="subheading">Approved contestants</h3>
-          {contestants.length ? (
-            <div className="contestant-grid">
-              {[...contestants].sort((a, b) => (b.voteCount ?? 0) - (a.voteCount ?? 0)).map((contestant, index) => (
-                <article className="contestant-card" key={contestant._id}>
-                  <div className="contestant-avatar">
-                    {contestant.photograph
-                      ? <img src={contestant.photograph} alt={contestant.stageName || contestant.fullName} />
-                      : String(index + 1).padStart(2, "0")}
-                  </div>
-                  <span>{contestant.category}</span>
-                  <h4>{contestant.stageName || contestant.fullName}</h4>
-                  <p>{contestant.entryTitle}</p>
-                  <div className="vote-row"><strong>{contestant.voteCount ?? 0} votes</strong><button onClick={() => voteForContestant(contestant._id)} disabled={challengeSchedule?.status==="registration"}>{challengeSchedule?.status==="registration"?"Voting opens Sunday 8 AM":"Vote"}</button></div>
-                </article>
-              ))}
-            </div>
-          ) : <div className="empty-contestants"><b>Contestants are being reviewed.</b><p>Approved entries will appear here before voting opens.</p></div>}
-          <h3 className="subheading">How to take part</h3>
-          <div className="steps">
-            {[
-              ["Register", "Register on the platform and pay the registration fee of Ksh 100."],
-              ["Share", "After registration, share your link with fans, platform members, and supporters."],
-              ["Voting closes", "Registration starts on any day and closes Sunday at 8:00 AM. At 8:00 AM, the challenge begins."],
-              ["Challenge ends", "The challenge runs until 9:00 PM on Sunday evening."],
-              ["Winner announced", "The winner is announced, contacted, and receives the challenge gift."],
-            ].map(([title, copy], index) => <article key={title}><b>{index + 1}</b><div><h4>{title}</h4><p>{copy}</p></div></article>)}
-          </div>
-          <button className="register-button" onClick={openChallengeRegistration}>Register for the challenge</button>
+          <button className="register-button" onClick={openChallengeRegistration}>Register <b aria-hidden="true">→</b></button>
+          <a className="homepage-jishindie-link" href="/jishindie">View contestants, winners and voting</a>
           {challengeNotice && <p className="challenge-notice" role="status">{challengeNotice}</p>}
         </section>
 
@@ -383,27 +348,13 @@ export default function Home() {
         )}
 
         <section className="mw-section about-section" id="about">
-          <div className="section-title"><h2>About Us</h2><p>We are a creative content studio dedicated to telling authentic African stories through video, podcasting, and digital media.</p></div>
-          <div className="story"><div className="story-art">MzimaWells</div><div><h3>Our Story</h3><p>MzimaWells Studios was born from a passion for authentic storytelling and a vision to amplify African voices.</p><p>We have grown into a full-service creative studio producing music videos, documentaries, podcasts, and digital content.</p><p>Today, we continue to push creative boundaries while telling stories that matter and creating opportunities for emerging talent.</p></div></div>
-          <h3 className="subheading">Our Values</h3>
-          <div className="values">{["Innovation", "Passion", "Excellence", "Vision"].map((value, index) => <article key={value}><b>{["↗", "♥", "★", "◎"][index]}</b><h4>{value}</h4><p>{["Fresh ideas and creative boundaries.", "Work driven by love for storytelling.", "High standards in every delivery.", "Content that inspires future generations."][index]}</p></article>)}</div>
-          <h3 className="subheading">Our Journey</h3>
-          <div className="journey">{[["2018", "The Beginning"], ["2020", "K-Run Podcast Launch"], ["2022", "Studio Expansion"], ["2024", "Growing Impact"]].map(([year, title]) => <article key={year}><b>{year}</b><h4>{title}</h4><p>{title === "Growing Impact" ? "Reaching audiences across the continent and beyond." : "A milestone in our creative growth journey."}</p></article>)}</div>
+          <div className="section-title"><h2>About Us</h2><p>A creative studio telling authentic African stories.</p></div>
+          <div className="title-actions"><a href="/about">Discover our story</a></div>
         </section>
 
         <section className="mw-section team-section" id="team">
           <div className="section-title"><h2>Our Team</h2><p>Meet the creative minds behind MzimaWells Studios</p></div>
-          <img className="team-crew-photo" src="/crew/mzima-wells-crew.jpeg" alt="MzimaWells Studios crew" />
-          <h3 className="subheading">Leadership Team</h3>
-          <div className="team-grid">
-            {[
-              ["Dokta Will", "Creative Director", "/crew/dokta-will.jpeg"],
-              ["Director Brian K", "Production Director", "/crew/director-brian-k.jpeg"],
-              ["Director Abel Kibet", "Content Director", "/crew/director-abel-kibet.jpeg"],
-              ["Duke Of Nomcity", "Technical Director", "/crew/director-duke-of-nomcity.jpeg"],
-            ].map(([name, role, photo]) => <article key={name}><img className="team-photo-real" src={photo} alt={name} /><h4>{name}</h4><strong>{role}</strong></article>)}
-          </div>
-          <div className="join-team"><h3>Join Our Team</h3><p>We are always looking for filmmakers, editors, content creators, and creative professionals who want to make an impact.</p><a className="join-team-link" href="/careers">View careers and opportunities</a></div>
+          <div className="title-actions"><a href="/team">Meet the team</a><a href="/careers">View careers</a></div>
         </section>
       </main>
 

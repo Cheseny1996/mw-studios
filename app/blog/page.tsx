@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const fallbackPosts = [
-  ["mzima-wells-studios-launches-new-podcast-series", "MzimaWells Studios Launches New Podcast Series", "December 15, 2024", "A new K-Run Podcast series explores African entertainment, culture, creativity, and meaningful conversations."],
+  ["kapsokwony-annual-run-announced", "Kapsokwony Annual Run Announced", "December 15, 2024", "MzimaWells Studios highlights the famous annual Kapsokwony community run."],
   ["jishindie-challenge-winners-announced", "Jishindie Challenge Winners Announced", "December 10, 2024", "Community voting celebrates talented creators from across the competition categories."],
   ["behind-the-scenes-latest-music-video-production", "Behind the Scenes: Latest Music Video Production", "December 5, 2024", "A look inside the planning, filming, editing, and collaboration behind our latest production."],
   ["community-outreach-program-success", "Community Outreach Program Success", "November 28, 2024", "More than 500 young creatives joined outreach activities across film, media, music, and digital storytelling."],
