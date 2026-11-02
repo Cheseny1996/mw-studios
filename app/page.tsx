@@ -55,8 +55,16 @@ const events = [
   ["Creative Minds Workshop", "February 15, 2025", "2:00 PM - 6:00 PM", "MzimaWells Studios, Nairobi", "An interactive workshop on content creation and digital storytelling.", 45],
 ] as const;
 
+const heroSlides = [
+  { image: "/crew/mzima-wells-crew.jpeg", eyebrow: "CREATIVE STORIES. REAL PEOPLE.", title: "Welcome to MzimaWells Studios", copy: "Where Creativity Flows and Stories Come to Life" },
+  { image: "/crew/director-abel-kibet.jpeg", eyebrow: "FILM • MUSIC • DOCUMENTARY", title: "Stories Made to Move You", copy: "Original African stories, beautifully produced" },
+  { image: "/crew/director-brian-k.jpeg", eyebrow: "DISCOVER THE SOUND", title: "K-Run Podcast", copy: "Conversations that inspire, educate and entertain" },
+  { image: "/crew/ann-cheroo.jpeg", eyebrow: "CREATE • COMPETE • SHINE", title: "The Jishindie Challenge", copy: "A platform where emerging talent takes the spotlight" },
+] as const;
+
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [heroIndex, setHeroIndex] = useState(0);
   const [registrationOpen, setRegistrationOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [accountMode, setAccountMode] = useState<"signin" | "signup">("signin");
@@ -85,6 +93,13 @@ export default function Home() {
       .then((response) => response.ok ? response.json() : null)
       .then((data) => setLiveEvents(data?.events ?? []))
       .catch(() => setLiveEvents([]));
+  }, []);
+
+  useEffect(() => {
+    const carousel = window.setInterval(() => {
+      setHeroIndex((current) => (current + 1) % heroSlides.length);
+    }, 5500);
+    return () => window.clearInterval(carousel);
   }, []);
 
   async function registerForChallenge(event: FormEvent<HTMLFormElement>) {
@@ -263,11 +278,54 @@ export default function Home() {
 
       <main>
         <section className="mw-hero" id="home">
-          <div className="hero-content">
-            <h2>Welcome to MzimaWells Studios</h2>
-            <p>Where Creativity Flows and Stories Come to Life</p>
-            <a href="#what-we-do">Explore Our Work</a>
+          <div className="hero-art" aria-hidden="true">
+            {heroSlides.map((slide, index) => (
+              <div
+                className={`hero-slide ${index === heroIndex ? "active" : ""}`}
+                style={{ backgroundImage: `url("${slide.image}")` }}
+                key={slide.image}
+              />
+            ))}
           </div>
+          <div className="hero-shade" aria-hidden="true" />
+          <div className="hero-content" key={heroSlides[heroIndex].title}>
+            <span className="hero-eyebrow">{heroSlides[heroIndex].eyebrow}</span>
+            <h2>{heroSlides[heroIndex].title}</h2>
+            <p>{heroSlides[heroIndex].copy}</p>
+            <div className="hero-actions">
+              <a href="#what-we-do">Explore Our Work <b aria-hidden="true">→</b></a>
+              <a className="hero-secondary" href="/about">Discover MzimaWells</a>
+            </div>
+          </div>
+          <button
+            className="hero-arrow hero-arrow-left"
+            type="button"
+            aria-label="Previous slide"
+            onClick={() => setHeroIndex((heroIndex - 1 + heroSlides.length) % heroSlides.length)}
+          >
+            ←
+          </button>
+          <button
+            className="hero-arrow hero-arrow-right"
+            type="button"
+            aria-label="Next slide"
+            onClick={() => setHeroIndex((heroIndex + 1) % heroSlides.length)}
+          >
+            →
+          </button>
+          <div className="hero-dots" aria-label="Hero carousel slides">
+            {heroSlides.map((slide, index) => (
+              <button
+                className={index === heroIndex ? "active" : ""}
+                type="button"
+                key={slide.title}
+                aria-label={`Show slide ${index + 1}`}
+                aria-current={index === heroIndex ? "true" : undefined}
+                onClick={() => setHeroIndex(index)}
+              />
+            ))}
+          </div>
+          <span className="hero-index">0{heroIndex + 1} <i /> 0{heroSlides.length}</span>
         </section>
 
         <section className="mw-section what-section" id="what-we-do">
