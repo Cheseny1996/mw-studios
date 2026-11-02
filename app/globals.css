@@ -432,8 +432,8 @@ button { font-family:inherit; cursor:pointer; }
 
 /* Reference design system applied across every public page */
 :root {
-  --reference-orange: #f4511e;
-  --reference-orange-dark: #df4315;
+  --reference-orange: #c59a3b;
+  --reference-orange-dark: #b8892e;
   --reference-navy: #172033;
   --reference-white: #ffffff;
 }
@@ -659,4 +659,61 @@ body,
     padding-left:20px;
     padding-right:20px;
   }
+}
+
+/* Remove red/orange-red text and accent tones across the entire site. */
+.mw-brand h1,
+.mw-brand h1 span,
+.inner-brand,
+.inner-brand span,
+.mw-nav a:hover,
+.mw-account-button,
+.what-card-action,
+.live-pill,
+.challenge-notice,
+.challenge-banner div>span,
+.contestant-card>span,
+.what-icon,
+.route-intro>span,
+.route-title>span,
+.route-kicker,
+.careers-intro>span,
+.careers-list article>span,
+.opportunity-meta a,
+.story-back,
+.story-page time,
+.blog-card time,
+.episode-number,
+.inline-action,
+.join-team-link,
+.join-team-page>span,
+.admin-main header span,
+.admin-overview article>span,
+.admin-overview article button,
+.admin-brand,
+.journey b,
+.stats strong,
+.stats b,
+.winners span {
+  color:#c59a3b !important;
+}
+
+.challenge-banner button,
+.route-cta,
+.route-button,
+.apply-button,
+.story-cta,
+.join-team-page a,
+.register-button,
+.submit-registration,
+.vote-row button,
+.podcast-actions button,
+.event-card button,
+.title-actions a,
+.title-actions button,
+.admin-form button,
+.admin-sidebar>a:last-child {
+  background:#c59a3b !important;
+  border-color:#c59a3b !important;
+  color:#111827 !important;
 }
