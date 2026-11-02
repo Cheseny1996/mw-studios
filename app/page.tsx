@@ -185,12 +185,12 @@ export default function Home() {
   const nav = [
     ["Home", "#home"],
     ["Blog", "/blog"],
-    ["K-Run Podcast", "#podcast"],
-    ["Events", "#events"],
-    ["Jishindie", "#jishindie"],
+    ["K-Run Podcast", "/podcast"],
+    ["Events", "/events"],
+    ["Jishindie", "/jishindie"],
     ["Careers", "/careers"],
-    ["About", "#about"],
-    ["Team", "#team"],
+    ["About", "/about"],
+    ["Team", "/team"],
   ];
 
   return (
@@ -277,10 +277,10 @@ export default function Home() {
           <h2>What We Do</h2>
           <div className="what-grid">
             {[
-              ["▶", "Video Production", "Professional video production services for music videos, commercials, and documentaries.", "#about"],
-              ["●", "Podcasting", "K-Run Podcast brings you the latest in entertainment, culture, and inspiration.", "#podcast"],
-              ["▣", "Events", "Creating memorable experiences through professional event coverage and management.", "#events"],
-              ["♛", "Jishindie Challenge", "Empowering creators through our innovative creative competition platform.", "#jishindie"],
+              ["▶", "Video Production", "Professional video production services for music videos, commercials, and documentaries.", "/about"],
+              ["●", "Podcasting", "K-Run Podcast brings you the latest in entertainment, culture, and inspiration.", "/podcast"],
+              ["▣", "Events", "Creating memorable experiences through professional event coverage and management.", "/events"],
+              ["♛", "Jishindie Challenge", "Empowering creators through our innovative creative competition platform.", "/jishindie"],
             ].map(([icon, title, copy, href]) => (
               <a className="what-card" href={href} key={title} aria-label={`Explore ${title}`}>
                 <span className="what-icon" aria-hidden="true">{icon}</span>
