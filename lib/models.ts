@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import { STAFF_DEPARTMENTS, STAFF_ROLES, type StaffDepartment, type StaffRole } from "@/lib/staff-roles";
 
 const models = mongoose.models;
 
@@ -8,7 +9,8 @@ export interface UserRecord {
   email: string;
   phone: string;
   passwordHash: string;
-  role: "member" | "super_admin" | "admin" | "content_editor" | "event_manager" | "communications" | "hr_manager" | "election_manager" | "shop_manager" | "finance_manager";
+  role: "member" | StaffRole;
+  department?: StaffDepartment;
   emailVerified: boolean;
   phoneVerified: boolean;
   voterId?: string;
@@ -22,7 +24,8 @@ export const UserModel = models.User ?? mongoose.model("User", new Schema<UserRe
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
   phone: { type: String, required: true },
   passwordHash: { type: String, required: true },
-  role: { type: String, default: "member" },
+  role: { type: String, enum: ["member", ...STAFF_ROLES], default: "member" },
+  department: { type: String, enum: STAFF_DEPARTMENTS, default: "other" },
   emailVerified: { type: Boolean, default: false },
   phoneVerified: { type: Boolean, default: false },
   voterId: { type: String, unique: true, sparse: true },

@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
+import { getFreshStaffSession } from "@/lib/staff-auth";
 import { connectToDatabase } from "@/lib/db";
 import { ChallengeRegistrationModel } from "@/lib/models";
 
 export async function GET(request: NextRequest) {
-  const session = await getSession();
+  const session = await getFreshStaffSession();
   if (!session || !["super_admin", "admin", "election_manager"].includes(String(session.role))) {
     return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   }
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  const session = await getSession();
+  const session = await getFreshStaffSession();
   if (!session || !["super_admin", "admin", "election_manager"].includes(String(session.role))) {
     return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   }

@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
+import { getFreshStaffSession } from "@/lib/staff-auth";
 import { connectToDatabase } from "@/lib/db";
 import { ContentModel } from "@/lib/models";
 
 function canManagePosts(role: string) {
-  return ["super_admin", "admin", "content_editor"].includes(role);
+  return ["super_admin", "admin", "content_editor", "communications"].includes(role);
 }
 
 export async function GET() {
-  const session = await getSession();
+  const session = await getFreshStaffSession();
   if (!session || !canManagePosts(String(session.role))) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   await connectToDatabase();
   const posts = await ContentModel.find({ type: "post" }).sort({ updatedAt: -1 }).lean();
@@ -16,7 +16,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const session = await getSession();
+  const session = await getFreshStaffSession();
   if (!session || !canManagePosts(String(session.role))) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   const body = await request.json().catch(() => null);
   if (!body?.title) return NextResponse.json({ error: "Title is required." }, { status: 400 });
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  const session = await getSession();
+  const session = await getFreshStaffSession();
   if (!session || !canManagePosts(String(session.role))) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   const body = await request.json().catch(() => null);
   if (!body?.id || !body?.title) return NextResponse.json({ error: "Post ID and title are required." }, { status: 400 });
@@ -46,7 +46,7 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const session = await getSession();
+  const session = await getFreshStaffSession();
   if (!session || !canManagePosts(String(session.role))) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   const id = request.nextUrl.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "Post ID is required." }, { status: 400 });

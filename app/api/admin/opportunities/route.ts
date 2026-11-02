@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
+import { getFreshStaffSession } from "@/lib/staff-auth";
 import { connectToDatabase } from "@/lib/db";
 import { OpportunityModel } from "@/lib/models";
 
 export async function GET() {
-  const session = await getSession();
+  const session = await getFreshStaffSession();
   if (!session || !["super_admin", "admin", "hr_manager", "content_editor"].includes(String(session.role))) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   await connectToDatabase();
   return NextResponse.json({ opportunities: await OpportunityModel.find().sort({ createdAt: -1 }).lean() });
 }
 
 export async function POST(request: NextRequest) {
-  const session = await getSession();
+  const session = await getFreshStaffSession();
   if (!session || !["super_admin", "admin", "hr_manager", "content_editor"].includes(String(session.role))) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   const body = await request.json().catch(() => null);
   if (!body?.title) return NextResponse.json({ error: "Title is required." }, { status: 400 });
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  const session = await getSession();
+  const session = await getFreshStaffSession();
   if (!session || !["super_admin", "admin", "hr_manager", "content_editor"].includes(String(session.role))) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   const body = await request.json().catch(() => null);
   if (!body?.id || !body?.title) return NextResponse.json({ error: "Opportunity ID and title are required." }, { status: 400 });
@@ -33,7 +33,7 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const session = await getSession();
+  const session = await getFreshStaffSession();
   if (!session || !["super_admin", "admin", "hr_manager", "content_editor"].includes(String(session.role))) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   const id = request.nextUrl.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "Opportunity ID is required." }, { status: 400 });
