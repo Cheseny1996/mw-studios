@@ -92,6 +92,7 @@ export const ChallengeRegistrationSchema = new Schema({
   category: { type: String, enum: ["music", "dance", "film", "fashion", "comedy", "content"], required: true },
   entryTitle: { type: String, required: true, trim: true },
   entryLink: { type: String, default: "" },
+  photograph: { type: String, default: "" },
   status: { type: String, enum: ["registered", "review", "approved", "rejected"], default: "registered", index: true },
   voterId: { type: String, default: "" },
 }, { timestamps: true });

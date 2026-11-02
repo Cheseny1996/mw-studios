@@ -33,7 +33,7 @@ export default function Home() {
   const [registrationOpen, setRegistrationOpen] = useState(false);
   const [challengeNotice, setChallengeNotice] = useState("");
   const [registeredCount, setRegisteredCount] = useState(0);
-  const [contestants, setContestants] = useState<Array<{ _id: string; stageName?: string; fullName: string; category: string; entryTitle: string; voteCount?: number }>>([]);
+  const [contestants, setContestants] = useState<Array<{ _id: string; stageName?: string; fullName: string; category: string; entryTitle: string; photograph?: string; voteCount?: number }>>([]);
   useEffect(() => {
     fetch("/api/jishindie/challenge")
       .then((response) => response.ok ? response.json() : null)
@@ -49,6 +49,20 @@ export default function Home() {
     event.preventDefault();
     const form = event.currentTarget;
     const payload = Object.fromEntries(new FormData(form));
+    const photoInput = form.elements.namedItem("photograph") as HTMLInputElement;
+    const photo = photoInput.files?.[0];
+    if (photo) {
+      if (photo.size > 750_000) {
+        setChallengeNotice("Please choose a profile photo smaller than 750 KB.");
+        return;
+      }
+      payload.photograph = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(new Error("Photo could not be read."));
+        reader.readAsDataURL(photo);
+      }).catch(() => "");
+    }
     setChallengeNotice("Submitting your registration...");
     const response = await fetch("/api/jishindie/challenge", {
       method: "POST",
@@ -150,19 +164,19 @@ export default function Home() {
             {news.map(([title, date, copy, trending], index) => (
               <article className="news-card" key={title}>
                 <div className={`card-art art-${index}`}><span>MzimaWells</span>{trending && <b>Trending</b>}</div>
-                <div className="card-body"><time>{date}</time><h3>{title}</h3><p>{copy}</p><button>Read More →</button></div>
+                <div className="card-body"><time>{date}</time><h3>{title}</h3><p>{copy}</p><a className="inline-action" href="mailto:info@mzimawellsstudios.com?subject=News%20enquiry">Ask about this story →</a></div>
               </article>
             ))}
           </div>
         </section>
 
         <section className="mw-section podcast-section" id="podcast">
-          <div className="section-title"><h2>K-Run Podcast</h2><p>Conversations that inspire, educate, and entertain</p><div className="title-actions"><button>Subscribe Now</button><a href="#episodes">View All Episodes</a></div></div>
+          <div className="section-title"><h2>K-Run Podcast</h2><p>Conversations that inspire, educate, and entertain</p><div className="title-actions"><a href="mailto:info@mzimawellsstudios.com?subject=K-Run%20Podcast%20subscription">Subscribe by email</a><a href="#episodes">View Episodes</a></div></div>
           <div className="podcast-grid" id="episodes">
             {episodes.map(([title, date, duration, copy], index) => (
               <article className="podcast-card" key={title}>
                 <div className={`podcast-art podcast-art-${index}`}><span>K</span></div>
-                <div className="card-body"><time>{date} • {duration}</time><h3>{title}</h3><p>{copy}</p><div className="podcast-actions"><button>▶ &nbsp; Play Episode</button><button className="download">↓ &nbsp; Download</button></div></div>
+                <div className="card-body"><time>{date} • {duration}</time><h3>{title}</h3><p>{copy}</p></div>
               </article>
             ))}
           </div>
@@ -175,7 +189,7 @@ export default function Home() {
             {events.map(([title, date, time, location, copy, attendees], index) => (
               <article className="event-card" key={title}>
                 <div className={`event-art event-art-${index}`}><span>{date.split(", ")[0]}</span></div>
-                <div className="card-body"><h3>{title}</h3><p>{copy}</p><ul><li>▣ {date}</li><li>◷ {time}</li><li>⌖ {location}</li><li>♙ {attendees} attendees registered</li></ul><button>Register Now</button></div>
+                <div className="card-body"><h3>{title}</h3><p>{copy}</p><ul><li>▣ {date}</li><li>◷ {time}</li><li>⌖ {location}</li><li>♙ {attendees} attendees registered</li></ul><a className="event-email-action" href={`mailto:info@mzimawellsstudios.com?subject=${encodeURIComponent(`Event registration: ${title}`)}`}>Register by email</a></div>
               </article>
             ))}
           </div>
@@ -205,7 +219,11 @@ export default function Home() {
             <div className="contestant-grid">
               {[...contestants].sort((a, b) => (b.voteCount ?? 0) - (a.voteCount ?? 0)).map((contestant, index) => (
                 <article className="contestant-card" key={contestant._id}>
-                  <div className="contestant-avatar">{String(index + 1).padStart(2, "0")}</div>
+                  <div className="contestant-avatar">
+                    {contestant.photograph
+                      ? <img src={contestant.photograph} alt={contestant.stageName || contestant.fullName} />
+                      : String(index + 1).padStart(2, "0")}
+                  </div>
                   <span>{contestant.category}</span>
                   <h4>{contestant.stageName || contestant.fullName}</h4>
                   <p>{contestant.entryTitle}</p>
@@ -240,6 +258,7 @@ export default function Home() {
                   <label>Category<select name="category" required defaultValue=""><option value="" disabled>Select a category</option><option value="music">Music</option><option value="dance">Dance</option><option value="film">Film</option><option value="fashion">Fashion</option><option value="comedy">Comedy</option><option value="content">Content creation</option></select></label>
                   <label>Entry title<input name="entryTitle" required minLength={2} maxLength={160} /></label>
                   <label className="full-field">Entry link<input name="entryLink" type="url" placeholder="https://youtube.com/..." /></label>
+                  <label className="full-field">Profile photo<input name="photograph" type="file" accept="image/jpeg,image/png,image/webp" /></label>
                 </div>
                 <button className="submit-registration" type="submit">Submit entry</button>
               </form>
@@ -262,16 +281,15 @@ export default function Home() {
           <div className="team-crew">Creative Collective</div>
           <h3 className="subheading">Leadership Team</h3>
           <div className="team-grid">
-            {[["Dokta Will", "Creative Director"], ["Director Brian K", "Production Director"], ["Director Abel Kibet", "Content Director"], ["Duke Of Nomcity", "Technical Director"]].map(([name, role], index) => <article key={name}><div className={`team-photo team-photo-${index}`} /><h4>{name}</h4><strong>{role}</strong></article>)}
+            {[["Elliot Cheseny", "MzimaWells Team"]].map(([name, role]) => <article key={name}><div className="team-photo team-photo-supplied" /><h4>{name}</h4><strong>{role}</strong></article>)}
           </div>
-          <div className="join-team"><h3>Join Our Team</h3><p>We are always looking for filmmakers, editors, content creators, and creative professionals who want to make an impact.</p><button>View Open Positions</button></div>
+          <div className="join-team"><h3>Join Our Team</h3><p>We are always looking for filmmakers, editors, content creators, and creative professionals who want to make an impact.</p><a className="join-team-link" href="mailto:info@mzimawellsstudios.com?subject=Careers%20at%20MzimaWells%20Studios">Ask About Opportunities</a></div>
         </section>
       </main>
 
       <footer className="mw-footer">
         <div><h2>MzimaWells Studios</h2><p>Creating compelling content that inspires, entertains, and connects communities.</p></div>
         <div><h3>Quick Links</h3>{nav.slice(0, 5).map(([label, href]) => <a key={href} href={href}>{label}</a>)}</div>
-        <div><h3>Follow MW Studios</h3><div className="socials"><a href="#">f</a><a href="#">in</a><a href="#">▶</a><a href="#">◎</a><a href="#">x</a></div><p>Email: info@mzimawellsstudios.com</p><p>Phone: +254 700 000 000</p></div>
         <p className="copyright">© 2026 MzimaWells Studios. All rights reserved.</p>
       </footer>
     </div>

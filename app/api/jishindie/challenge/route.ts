@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   const [registered, approved, totals] = await Promise.all([
     ChallengeRegistrationModel.countDocuments({ challengeSlug: slug }),
     ChallengeRegistrationModel.find({ challengeSlug: slug, status: "approved" })
-      .select("fullName stageName category entryTitle entryLink status voterId")
+      .select("fullName stageName category entryTitle entryLink photograph status voterId")
       .lean(),
     ChallengeVoteModel.aggregate([
       { $match: { challengeSlug: slug } },
@@ -45,6 +45,10 @@ const registrationSchema = z.object({
   category: z.enum(["music", "dance", "film", "fashion", "comedy", "content"]),
   entryTitle: z.string().trim().min(2).max(160),
   entryLink: z.string().trim().url().optional().or(z.literal("")),
+  photograph: z.string().max(2_500_000).optional().refine(
+    (value) => !value || /^data:image\/(jpeg|png|webp);base64,/i.test(value),
+    "Upload a JPEG, PNG, or WebP image.",
+  ),
 });
 
 export async function POST(request: NextRequest) {
