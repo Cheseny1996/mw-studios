@@ -17,7 +17,7 @@ const productSchema = z.object({
   slug: z.string().trim().toLowerCase().min(2).max(180).regex(/^[a-z0-9-]+$/),
   description: z.string().trim().max(2000).default(""),
   imageUrl: z.string().trim().max(2048).url().or(z.literal("")).default(""),
-  price: z.coerce.number().min(0).max(100_000_000),
+  price: z.coerce.number().int().min(1).max(100_000_000),
   categorySlug: z.string().trim().toLowerCase().min(2).max(120),
   status: z.enum(["draft", "published"]).default("draft"),
 });

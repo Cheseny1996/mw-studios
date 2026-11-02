@@ -39,6 +39,8 @@ export async function GET(request: NextRequest) {
       title: schedule.title,
       type: schedule.challengeType,
       status: schedule.status,
+      published: schedule.published,
+      description: schedule.description,
     },
     registered,
     totalVotes: totals.reduce((sum: number, row: { votes: number }) => sum + row.votes, 0),
@@ -84,6 +86,9 @@ export async function POST(request: NextRequest) {
   await connectToDatabase();
   const slug = parsed.data.challengeSlug || "weekly-jishindie";
   const schedule = await getChallengeSchedule(slug);
+  if (!schedule.published) {
+    return NextResponse.json({ error: "This challenge has not been published yet." }, { status: 409 });
+  }
   if (schedule.status !== "registration") {
     return NextResponse.json({
       error: schedule.status === "voting"

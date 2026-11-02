@@ -9,6 +9,8 @@ type ChallengeSettings = {
   challengeSlug: string;
   title: string;
   challengeType: string;
+  description: string;
+  published: boolean;
   registrationStartsAt: string;
   registrationEndsAt: string;
   votingStartsAt: string;
@@ -19,7 +21,7 @@ type ChallengeSettings = {
 type PollRecord = { _id: string; title: string; description: string; options: string[]; startsAt: string; endsAt: string; status: string; votes?: number };
 type ShopCategory = { _id: string; name: string; slug: string; description: string; active: boolean };
 type ShopProduct = { _id: string; name: string; slug: string; description: string; imageUrl: string; price: number; categorySlug: string; status: string };
-type ShopOrder = { _id: string; orderNumber: string; customerName: string; email: string; phone: string; total: number; status: string; items: Array<{ name: string; quantity: number }> };
+type ShopOrder = { _id: string; orderNumber: string; customerName: string; email: string; phone: string; total: number; status: string; paymentStatus?: string; mpesaReceiptNumber?: string; deliveryMethod?: string; deliveryAddress?: string; items: Array<{ name: string; quantity: number }> };
 
 function createArticleBlock(kind: ArticleBlock["kind"], level = 2): ArticleBlock {
   return { id: crypto.randomUUID(), kind, level, text: "" };
@@ -73,6 +75,8 @@ export default function AdminPage() {
     challengeSlug: "weekly-jishindie",
     title: "Weekly Jishindie Challenge",
     challengeType: "creative",
+    description: "",
+    published: true,
     registrationStartsAt: "",
     registrationEndsAt: "",
     votingStartsAt: "",
@@ -89,6 +93,8 @@ export default function AdminPage() {
   const [productEditingId, setProductEditingId] = useState("");
   const [categoryForm, setCategoryForm] = useState({ name: "", slug: "", description: "", active: true });
   const [productForm, setProductForm] = useState({ name: "", slug: "", description: "", imageUrl: "", price: "", categorySlug: "", status: "draft" });
+  const [productImageFile, setProductImageFile] = useState<File | null>(null);
+  const [productImageUploading, setProductImageUploading] = useState(false);
   const [items, setItems] = useState<Array<Record<string, unknown>>>([]);
   const [editingId, setEditingId] = useState("");
   const [articleBlocks, setArticleBlocks] = useState<ArticleBlock[]>([{ id: "initial-paragraph", kind: "paragraph", level: 2, text: "" }]);
@@ -165,6 +171,8 @@ export default function AdminPage() {
       const dateInput = (date: string | undefined) => date ? new Date(date).toISOString().slice(0, 16) : "";
       setChallengeSettings(selected ? {
         ...selected,
+        description: selected.description || "",
+        published: selected.published !== false,
         registrationStartsAt: dateInput(selected.registrationStartsAt),
         registrationEndsAt: dateInput(selected.registrationEndsAt),
         votingStartsAt: dateInput(selected.votingStartsAt),
@@ -173,6 +181,8 @@ export default function AdminPage() {
         challengeSlug: "weekly-jishindie",
         title: "Weekly Jishindie Challenge",
         challengeType: "creative",
+        description: fallback.description || "",
+        published: fallback.published !== false,
         registrationStartsAt: dateInput(fallback.registrationStartsAt),
         registrationEndsAt: dateInput(fallback.registrationEndsAt),
         votingStartsAt: dateInput(fallback.votingStartsAt),
@@ -285,23 +295,60 @@ export default function AdminPage() {
 
   async function saveChallengeSettings(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const form = event.currentTarget;
-    const fields = Object.fromEntries(new FormData(form));
     const body = {
-      ...fields,
-      registrationStartsAt: new Date(String(fields.registrationStartsAt)).toISOString(),
-      registrationEndsAt: new Date(String(fields.registrationEndsAt)).toISOString(),
-      votingStartsAt: new Date(String(fields.votingStartsAt)).toISOString(),
-      votingEndsAt: new Date(String(fields.votingEndsAt)).toISOString(),
+      ...challengeSettings,
+      registrationStartsAt: new Date(challengeSettings.registrationStartsAt).toISOString(),
+      registrationEndsAt: new Date(challengeSettings.registrationEndsAt).toISOString(),
+      votingStartsAt: new Date(challengeSettings.votingStartsAt).toISOString(),
+      votingEndsAt: new Date(challengeSettings.votingEndsAt).toISOString(),
     };
-    const response = await fetch("/api/admin/jishindie/settings", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+    try {
+      const response = await fetch("/api/admin/jishindie/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await response.json().catch(() => ({}));
+      setNotice(response.ok
+        ? `Challenge ${challengeSettings.published ? "published" : "saved as draft"}.`
+        : data.error || "Could not save challenge.");
+      if (response.ok && data.settings) {
+        const saved = data.settings as ChallengeSettings;
+        const dateInput = (date: string) => new Date(date).toISOString().slice(0, 16);
+        setSavedChallengeSettings((current) => [
+          ...current.filter((item) => item.challengeSlug !== saved.challengeSlug),
+          saved,
+        ]);
+        setChallengeSettings({
+          ...saved,
+          description: saved.description || "",
+          published: saved.published !== false,
+          registrationStartsAt: dateInput(saved.registrationStartsAt),
+          registrationEndsAt: dateInput(saved.registrationEndsAt),
+          votingStartsAt: dateInput(saved.votingStartsAt),
+          votingEndsAt: dateInput(saved.votingEndsAt),
+        });
+      }
+    } catch {
+      setNotice("Could not reach challenge publishing. Check your connection and try again.");
+    }
+  }
+
+  function createCustomChallenge() {
+    setChallengeSettings({
+      challengeSlug: `new-challenge-${Date.now().toString(36)}`,
+      title: "",
+      challengeType: "custom",
+      description: "",
+      published: false,
+      registrationStartsAt: "",
+      registrationEndsAt: "",
+      votingStartsAt: "",
+      votingEndsAt: "",
+      nextAnnouncement: "",
+      prizeSummary: "",
     });
-    const data = await response.json().catch(() => ({}));
-    setNotice(response.ok ? "Challenge schedule saved." : data.error || "Could not save schedule.");
-    if (response.ok) await loadTab("jishindie");
+    setNotice("Complete the custom challenge details, then save it as a draft or publish it.");
   }
 
   async function selectChallengeSettings(challengeSlug: string, title: string, challengeType: string) {
@@ -310,6 +357,8 @@ export default function AdminPage() {
       const dateInput = (date: string) => new Date(date).toISOString().slice(0, 16);
       setChallengeSettings({
         ...saved,
+        description: saved.description || "",
+        published: saved.published !== false,
         registrationStartsAt: dateInput(saved.registrationStartsAt),
         registrationEndsAt: dateInput(saved.registrationEndsAt),
         votingStartsAt: dateInput(saved.votingStartsAt),
@@ -328,6 +377,8 @@ export default function AdminPage() {
       challengeSlug,
       title,
       challengeType,
+      description: data.schedule?.description || "",
+      published: data.schedule?.published !== false,
       registrationStartsAt: dateInput(data.schedule?.registrationStartsAt),
       registrationEndsAt: dateInput(data.schedule?.registrationEndsAt),
       votingStartsAt: dateInput(data.schedule?.votingStartsAt),
@@ -383,17 +434,37 @@ export default function AdminPage() {
 
   async function saveShopProduct(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const response = await fetch("/api/admin/shop", {
-      method: productEditingId ? "PATCH" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...productForm, price: Number(productForm.price), kind: "product", ...(productEditingId ? { id: productEditingId } : {}) }),
-    });
-    const data = await response.json().catch(() => ({}));
-    setNotice(response.ok ? "Shop product saved." : data.error || "Could not save product.");
-    if (response.ok) {
-      setProductEditingId("");
-      setProductForm({ name: "", slug: "", description: "", imageUrl: "", price: "", categorySlug: "", status: "draft" });
-      await loadTab("shop");
+    setProductImageUploading(true);
+    try {
+      let imageUrl = productForm.imageUrl;
+      if (productImageFile) {
+        const uploadForm = new FormData();
+        uploadForm.set("file", productImageFile);
+        const uploadResponse = await fetch("/api/admin/shop/image", { method: "POST", body: uploadForm });
+        const uploadData = await uploadResponse.json().catch(() => ({}));
+        if (!uploadResponse.ok) {
+          setNotice(uploadData.error || "Could not upload the product image.");
+          return;
+        }
+        imageUrl = uploadData.url;
+      }
+      const response = await fetch("/api/admin/shop", {
+        method: productEditingId ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...productForm, imageUrl, price: Number(productForm.price), kind: "product", ...(productEditingId ? { id: productEditingId } : {}) }),
+      });
+      const data = await response.json().catch(() => ({}));
+      setNotice(response.ok ? "Shop product saved." : data.error || "Could not save product.");
+      if (response.ok) {
+        setProductEditingId("");
+        setProductImageFile(null);
+        setProductForm({ name: "", slug: "", description: "", imageUrl: "", price: "", categorySlug: "", status: "draft" });
+        await loadTab("shop");
+      }
+    } catch {
+      setNotice("Could not reach shop administration. Check your connection and try again.");
+    } finally {
+      setProductImageUploading(false);
     }
   }
 
@@ -577,7 +648,7 @@ export default function AdminPage() {
         {tab === "events" && <div className="admin-panel"><h2>{editingId ? "Edit event" : "New event"}</h2><form className="admin-form" onSubmit={saveEvent}><input name="title" placeholder="Event title" required /><input name="slug" placeholder="Permalink slug (optional)" /><input name="date" type="datetime-local" required /><input name="time" placeholder="Time, e.g. 7:00 PM" /><input name="location" placeholder="Location" /><input name="capacity" type="number" min="0" placeholder="Capacity" /><textarea name="description" placeholder="Event description" rows={7} /><select name="status"><option value="draft">Draft</option><option value="published">Published</option><option value="cancelled">Cancelled</option></select><button>{editingId ? "Update event" : "Save / publish event"}</button>{editingId && <button type="button" onClick={() => { setEditingId(""); loadTab("events"); }}>Cancel editing</button>}</form><div className="admin-item-list">{items.map((item)=><div key={String(item._id)}><p><b>{String(item.title)}</b><span>{String(item.status)} · {String(item.location || "")}</span></p><div><button onClick={()=>editItem(item)}>Edit</button><button className="danger-button" onClick={()=>deleteItem("events",String(item._id))}>Delete</button></div></div>)}</div></div>}
         {tab === "opportunities" && <div className="admin-panel"><h2>{editingId ? "Edit career opportunity" : "New career opportunity"}</h2><form className="admin-form" onSubmit={saveOpportunity}><input name="title" placeholder="Job title" required /><input name="slug" placeholder="Permalink slug (optional)" /><select name="department"><option value="hr">HR</option><option value="creative">Creative</option><option value="production">Production</option><option value="communications">Communications</option><option value="events">Events</option><option value="technology">Technology</option><option value="other">Other</option></select><input name="location" placeholder="Location" /><input name="employmentType" placeholder="Employment type" /><input name="applicationEmail" type="email" placeholder="Application email" /><input name="applicationUrl" placeholder="Application URL (optional)" /><textarea name="summary" placeholder="Opportunity summary" rows={4} /><textarea name="description" placeholder="Role description" rows={5} /><textarea name="requirements" placeholder="Requirements" rows={5} /><select name="status"><option value="draft">Draft</option><option value="published">Published</option><option value="closed">Closed</option></select><button>{editingId ? "Update opportunity" : "Save / publish opportunity"}</button>{editingId && <button type="button" onClick={() => { setEditingId(""); loadTab("opportunities"); }}>Cancel editing</button>}</form><div className="admin-item-list">{items.map((item)=><div key={String(item._id)}><p><b>{String(item.title)}</b><span>{String(item.status)} · {String(item.location || "")}</span></p><div><button onClick={()=>editItem(item)}>Edit</button><button className="danger-button" onClick={()=>deleteItem("opportunities",String(item._id))}>Delete</button></div></div>)}</div></div>}
         {tab === "jishindie" && <div className="admin-panel">
-          <h2>Challenge schedule and format</h2>
+          <div className="post-admin-heading"><div><h2>Publish and schedule challenges</h2><p>Create a custom challenge or edit an existing challenge. Drafts are not open for registration or voting.</p></div><button type="button" onClick={createCustomChallenge}>Create custom challenge</button></div>
           <form className="admin-form" onSubmit={saveChallengeSettings}>
             <label>Challenge<select value={challengeSettings.challengeSlug} onChange={(event) => {
               const option = event.target.selectedOptions[0];
@@ -588,16 +659,21 @@ export default function AdminPage() {
               <option value="seasonal-challenge" data-type="seasonal">End-of-Season Challenge</option>
               <option value="game-night-challenge" data-type="game_night">Game Night Challenge</option>
               <option value="kapsokwony-annual-run" data-type="custom">Kapsokwony Annual Run</option>
+              {!["weekly-jishindie", "tshirt-challenge", "seasonal-challenge", "game-night-challenge", "kapsokwony-annual-run"].includes(challengeSettings.challengeSlug) && <option value={challengeSettings.challengeSlug} data-type="custom">{challengeSettings.title || "New custom challenge"}</option>}
+              {savedChallengeSettings.filter((item) => item.challengeSlug !== challengeSettings.challengeSlug && !["weekly-jishindie", "tshirt-challenge", "seasonal-challenge", "game-night-challenge", "kapsokwony-annual-run"].includes(item.challengeSlug)).map((item) => <option key={item.challengeSlug} value={item.challengeSlug} data-type={item.challengeType}>{item.title}</option>)}
             </select></label>
+            <label>Challenge URL key<input value={challengeSettings.challengeSlug} onChange={(event) => setChallengeSettings((current) => ({ ...current, challengeSlug: event.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "") }))} required minLength={2} maxLength={100} pattern="[a-z0-9]+(-[a-z0-9]+)*" /></label>
             <label>Display title<input value={challengeSettings.title} onChange={(event) => setChallengeSettings((current) => ({ ...current, title: event.target.value }))} required maxLength={160} /></label>
             <label>Challenge format<select value={challengeSettings.challengeType} onChange={(event) => setChallengeSettings((current) => ({ ...current, challengeType: event.target.value }))}><option value="creative">Creator challenge</option><option value="tshirt">T-shirt challenge</option><option value="seasonal">End-of-season challenge</option><option value="game_night">Game night</option><option value="custom">Other</option></select></label>
+            <label>Challenge details<textarea value={challengeSettings.description} onChange={(event) => setChallengeSettings((current) => ({ ...current, description: event.target.value }))} maxLength={2000} rows={4} placeholder="Describe the challenge and what contestants should submit." /></label>
             <label>Registration opens<input type="datetime-local" value={challengeSettings.registrationStartsAt} onChange={(event) => setChallengeSettings((current) => ({ ...current, registrationStartsAt: event.target.value }))} required /></label>
             <label>Registration closes<input type="datetime-local" value={challengeSettings.registrationEndsAt} onChange={(event) => setChallengeSettings((current) => ({ ...current, registrationEndsAt: event.target.value }))} required /></label>
             <label>Voting opens<input type="datetime-local" value={challengeSettings.votingStartsAt} onChange={(event) => setChallengeSettings((current) => ({ ...current, votingStartsAt: event.target.value }))} required /></label>
             <label>Voting closes<input type="datetime-local" value={challengeSettings.votingEndsAt} onChange={(event) => setChallengeSettings((current) => ({ ...current, votingEndsAt: event.target.value }))} required /></label>
             <label>Announcement<textarea value={challengeSettings.nextAnnouncement} onChange={(event) => setChallengeSettings((current) => ({ ...current, nextAnnouncement: event.target.value }))} maxLength={1000} rows={3} /></label>
             <label>Prize details<textarea value={challengeSettings.prizeSummary} onChange={(event) => setChallengeSettings((current) => ({ ...current, prizeSummary: event.target.value }))} maxLength={1000} rows={3} /></label>
-            <button type="submit">Save challenge schedule</button>
+            <label>Publication<select value={challengeSettings.published ? "published" : "draft"} onChange={(event) => setChallengeSettings((current) => ({ ...current, published: event.target.value === "published" }))}><option value="draft">Save as draft</option><option value="published">Publish challenge</option></select></label>
+            <button type="submit">{challengeSettings.published ? "Save and publish challenge" : "Save challenge draft"}</button>
           </form>
           <h2>Contestant registrations</h2>
           <div className="staff-table">{items.map((entry) => <div key={String(entry._id)}><p><b>{String(entry.stageName || entry.fullName)}</b><span>{String(entry.category)} · {String(entry.status)} · {String(entry.email || "")}</span></p><select value={String(entry.status)} onChange={(event) => updateJishindieEntry(String(entry._id), event.target.value)}><option value="registered">Registered</option><option value="review">Under review</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select></div>)}</div>
@@ -630,16 +706,17 @@ export default function AdminPage() {
             <label>Product name<input value={productForm.name} onChange={(event) => setProductForm((current) => ({ ...current, name: event.target.value }))} required maxLength={160} /></label>
             <label>URL slug<input value={productForm.slug} onChange={(event) => setProductForm((current) => ({ ...current, slug: event.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, "-") }))} required maxLength={180} /></label>
             <label>Category<select value={productForm.categorySlug} onChange={(event) => setProductForm((current) => ({ ...current, categorySlug: event.target.value }))} required><option value="">Select category</option>{shopCategories.map((category) => <option key={category._id} value={category.slug}>{category.name}</option>)}</select></label>
-            <label>Price (KSh)<input type="number" min="0" step="0.01" value={productForm.price} onChange={(event) => setProductForm((current) => ({ ...current, price: event.target.value }))} required /></label>
-            <label>Image URL<input type="url" value={productForm.imageUrl} onChange={(event) => setProductForm((current) => ({ ...current, imageUrl: event.target.value }))} placeholder="https://…" /></label>
+            <label>Price (KSh)<input type="number" min="1" step="1" value={productForm.price} onChange={(event) => setProductForm((current) => ({ ...current, price: event.target.value }))} required /></label>
+            <label>Product image URL<input type="url" value={productForm.imageUrl} onChange={(event) => setProductForm((current) => ({ ...current, imageUrl: event.target.value }))} placeholder="https://…" /></label>
+            <label>Or upload a product image<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setProductImageFile(event.target.files?.[0] || null)} /><small>JPEG, PNG or WebP; up to 4 MB. Uploading replaces the image URL.</small></label>
             <label>Description<textarea value={productForm.description} onChange={(event) => setProductForm((current) => ({ ...current, description: event.target.value }))} maxLength={2000} rows={4} /></label>
             <label>Listing status<select value={productForm.status} onChange={(event) => setProductForm((current) => ({ ...current, status: event.target.value }))}><option value="draft">Draft</option><option value="published">Published</option></select></label>
-            <button type="submit" disabled={!shopCategories.length}>{productEditingId ? "Update product" : "Save product"}</button>
-            {productEditingId && <button type="button" onClick={() => { setProductEditingId(""); setProductForm({ name: "", slug: "", description: "", imageUrl: "", price: "", categorySlug: "", status: "draft" }); }}>Cancel</button>}
+            <button type="submit" disabled={!shopCategories.length || productImageUploading}>{productImageUploading ? "Saving product…" : productEditingId ? "Update product" : "Save product"}</button>
+            {productEditingId && <button type="button" onClick={() => { setProductEditingId(""); setProductImageFile(null); setProductForm({ name: "", slug: "", description: "", imageUrl: "", price: "", categorySlug: "", status: "draft" }); }}>Cancel</button>}
           </form>
-          <div className="admin-item-list">{shopProducts.map((product) => <div key={product._id}><p><b>{product.name}</b><span>{product.status} · {shopCategories.find((category) => category.slug === product.categorySlug)?.name || product.categorySlug} · KSh {Number(product.price).toLocaleString()}</span></p><div><button onClick={() => { setProductEditingId(product._id); setProductForm({ name: product.name, slug: product.slug, description: product.description || "", imageUrl: product.imageUrl || "", price: String(product.price), categorySlug: product.categorySlug, status: product.status }); }}>Edit</button><button className="danger-button" onClick={() => deleteShopRecord("product", product._id)}>Delete</button></div></div>)}</div>
+          <div className="admin-item-list">{shopProducts.map((product) => <div key={product._id}><p><b>{product.name}</b><span>{product.status} · {shopCategories.find((category) => category.slug === product.categorySlug)?.name || product.categorySlug} · KSh {Number(product.price).toLocaleString()}</span></p><div><button onClick={() => { setProductEditingId(product._id); setProductImageFile(null); setProductForm({ name: product.name, slug: product.slug, description: product.description || "", imageUrl: product.imageUrl || "", price: String(product.price), categorySlug: product.categorySlug, status: product.status }); }}>Edit</button><button className="danger-button" onClick={() => deleteShopRecord("product", product._id)}>Delete</button></div></div>)}</div>
           <h2>Customer orders</h2>
-          <div className="admin-item-list">{shopOrders.map((order) => <div key={order._id}><p><b>{order.orderNumber} · {order.customerName}</b><span>{order.email} · {order.phone} · {order.items.map((item) => `${item.name} × ${item.quantity}`).join(", ")} · KSh {Number(order.total).toLocaleString()}</span></p><select value={order.status} onChange={(event) => updateShopOrder(order._id, event.target.value)}><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="fulfilled">Fulfilled</option><option value="cancelled">Cancelled</option></select></div>)}</div>
+          <div className="admin-item-list">{shopOrders.map((order) => <div key={order._id}><p><b>{order.orderNumber} · {order.customerName}</b><span>{order.email} · {order.phone} · {order.items.map((item) => `${item.name} × ${item.quantity}`).join(", ")} · KSh {Number(order.total).toLocaleString()} · M-Pesa: {order.paymentStatus || "pending"}{order.mpesaReceiptNumber ? ` (${order.mpesaReceiptNumber})` : ""} · {order.deliveryMethod || "delivery"}{order.deliveryAddress ? `: ${order.deliveryAddress}` : ""}</span></p><select value={order.status} onChange={(event) => updateShopOrder(order._id, event.target.value)}><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="fulfilled">Fulfilled</option><option value="cancelled">Cancelled</option></select></div>)}</div>
         </div>}
         {tab === "users" && ["super_admin", "department_admin"].includes(staff.role) && <div className="admin-panel">
           <h2>Delegate staff access</h2>

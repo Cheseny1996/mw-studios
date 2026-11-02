@@ -17,6 +17,9 @@ export async function POST(request: NextRequest) {
   await connectToDatabase();
   const challengeSlug = parsed.data.challengeSlug || "weekly-jishindie";
   const schedule = await getChallengeSchedule(challengeSlug);
+  if (!schedule.published) {
+    return NextResponse.json({ error: "This challenge has not been published yet." }, { status: 409 });
+  }
   if (schedule.status !== "voting") {
     return NextResponse.json({
       error: schedule.status === "registration" || schedule.status === "scheduled"

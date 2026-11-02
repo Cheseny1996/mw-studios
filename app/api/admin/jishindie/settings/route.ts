@@ -8,6 +8,8 @@ const settingsSchema = z.object({
   challengeSlug: z.string().trim().min(2).max(100).regex(/^[a-z0-9-]+$/),
   title: z.string().trim().min(2).max(160),
   challengeType: z.enum(["tshirt", "seasonal", "game_night", "creative", "custom"]),
+  description: z.string().trim().max(2000).default(""),
+  published: z.boolean().default(true),
   registrationStartsAt: z.string().datetime(),
   registrationEndsAt: z.string().datetime(),
   votingStartsAt: z.string().datetime(),

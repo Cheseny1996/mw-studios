@@ -3,11 +3,20 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 
+const defaultChallenges = [
+  { slug: "weekly-jishindie", title: "Weekly Jishindie", type: "creative" },
+  { slug: "tshirt-challenge", title: "T-shirt Challenge", type: "tshirt" },
+  { slug: "seasonal-challenge", title: "End-of-Season Challenge", type: "seasonal" },
+  { slug: "game-night-challenge", title: "Game Night Challenge", type: "game_night" },
+  { slug: "kapsokwony-annual-run", title: "Kapsokwony Annual Run", type: "custom" },
+];
+
 export default function JishindiePage() {
   const [challengeSlug,setChallengeSlug] = useState("weekly-jishindie");
+  const [publishedChallenges,setPublishedChallenges] = useState<Array<{slug:string;title:string;type:string}>>([]);
   const [registered,setRegistered] = useState(0);
   const [contestants,setContestants] = useState<Array<{_id:string;stageName?:string;fullName:string;category:string;entryTitle:string;photograph?:string;voteCount?:number}>>([]);
-  const [schedule,setSchedule] = useState<{status:string;title:string;challengeType:string;registrationStartsAt:string;registrationEndsAt:string;votingStartsAt:string;votingEndsAt:string;nextAnnouncement:string;prizeSummary?:string}|null>(null);
+  const [schedule,setSchedule] = useState<{status:string;title:string;challengeType:string;description?:string;published?:boolean;registrationStartsAt:string;registrationEndsAt:string;votingStartsAt:string;votingEndsAt:string;nextAnnouncement:string;prizeSummary?:string}|null>(null);
   const [now,setNow] = useState(0);
   const [totalVotes,setTotalVotes] = useState(0);
   const [voteTrend,setVoteTrend] = useState<Array<{at:string;votes:number}>>([]);
@@ -26,6 +35,16 @@ export default function JishindiePage() {
     if (query.get("join")==="contestant") {
       window.setTimeout(()=>setRegistrationOpen(true),0);
     }
+  },[]);
+
+  useEffect(()=>{
+    fetch("/api/jishindie/challenges",{cache:"no-store"})
+      .then(async response=>{
+        const data=await response.json().catch(()=>({}));
+        if(!response.ok) throw new Error(data.error||"Could not load published challenges.");
+        setPublishedChallenges(data.challenges||[]);
+      })
+      .catch(()=>setPublishedChallenges([]));
   },[]);
 
   useEffect(()=>{
@@ -130,18 +149,14 @@ export default function JishindiePage() {
       <section className="route-content">
         <label className="challenge-selector">Choose a challenge
           <select value={challengeSlug} onChange={(event)=>setChallengeSlug(event.target.value)}>
-            <option value="weekly-jishindie">Weekly Jishindie</option>
-            <option value="tshirt-challenge">T-shirt Challenge</option>
-            <option value="seasonal-challenge">End-of-Season Challenge</option>
-            <option value="game-night-challenge">Game Night Challenge</option>
-            <option value="kapsokwony-annual-run">Kapsokwony Annual Run</option>
+            {[...new Map([...defaultChallenges,...publishedChallenges].map(challenge=>[challenge.slug,challenge])).values()].map(challenge=><option key={challenge.slug} value={challenge.slug}>{challenge.title}</option>)}
           </select>
         </label>
-        <button className="route-primary-action" type="button" onClick={()=>setRegistrationOpen(true)} disabled={schedule?.status!=="registration"}>{schedule?.status==="registration"?"Register for this challenge":"Registration closed"}</button>
-        <div className="route-intro"><span>{schedule?.challengeType?.replaceAll("_"," ").toUpperCase()||"JISHINDIE"}</span><h2>{schedule?.title||"Show your talent to the world."}</h2><p>Open to artists, dancers, filmmakers, fashion creators, comedians, and digital storytellers. Create, submit, and receive votes from the community.</p></div>
+        <button className="route-primary-action" type="button" onClick={()=>setRegistrationOpen(true)} disabled={schedule?.published===false||schedule?.status!=="registration"}>{schedule?.published===false?"Challenge not published":schedule?.status==="registration"?"Register for this challenge":"Registration closed"}</button>
+        <div className="route-intro"><span>{schedule?.challengeType?.replaceAll("_"," ").toUpperCase()||"JISHINDIE"}</span><h2>{schedule?.title||"Show your talent to the world."}</h2><p>{schedule?.description||"Open to artists, dancers, filmmakers, fashion creators, comedians, and digital storytellers. Create, submit, and receive votes from the community."}</p></div>
         <div className="challenge-live-panel">
           <div>
-            <span className="live-pill">{schedule?.status==="voting"?"LIVE VOTING":schedule?.status==="closed"?"CHALLENGE CLOSED":schedule?.status==="scheduled"?"UPCOMING CHALLENGE":"REGISTRATION OPEN"}</span>
+            <span className="live-pill">{schedule?.published===false?"CHALLENGE NOT PUBLISHED":schedule?.status==="voting"?"LIVE VOTING":schedule?.status==="closed"?"CHALLENGE CLOSED":schedule?.status==="scheduled"?"UPCOMING CHALLENGE":"REGISTRATION OPEN"}</span>
             <h2>{schedule?.status==="voting"?"Voting closes in":schedule?.status==="registration"?"Registration closes in":"Next challenge countdown"}</h2>
             <p>{schedule?.nextAnnouncement||"Loading this week's challenge schedule..."}</p>
           </div>
@@ -177,7 +192,7 @@ export default function JishindiePage() {
           </div>
         ) : <div className="empty-contestants"><b>No registrations yet.</b><p>New creators will appear here when they register.</p></div>}
         <div className="route-title"><span>CONTESTANTS</span><h2>Approved live leaderboard</h2></div>
-        {contestants.length?<div className="contestant-grid">{[...contestants].sort((a,b)=>(b.voteCount||0)-(a.voteCount||0)).map((contestant,index)=><article className="contestant-card" key={contestant._id}><div className="leaderboard-rank">#{index+1}</div><div className="contestant-avatar">{contestant.photograph?<img src={contestant.photograph} alt={contestant.stageName||contestant.fullName}/>:String(index+1).padStart(2,"0")}</div><span>{contestant.category}</span><h4>{contestant.stageName||contestant.fullName}</h4><p>{contestant.entryTitle}</p><div className="vote-row"><strong>{contestant.voteCount||0} votes</strong><button onClick={()=>voteFor(contestant._id)} disabled={schedule?.status!=="voting"}>{schedule?.status==="voting"?"Vote now":schedule?.status==="registration"?"Voting opens at 8 AM":"Voting closed"}</button></div></article>)}</div>:<div className="empty-contestants"><b>Contestants are being reviewed.</b><p>Approved entries will appear here before voting opens.</p></div>}
+        {contestants.length?<div className="contestant-grid">{[...contestants].sort((a,b)=>(b.voteCount||0)-(a.voteCount||0)).map((contestant,index)=><article className="contestant-card" key={contestant._id}><div className="leaderboard-rank">#{index+1}</div><div className="contestant-avatar">{contestant.photograph?<img src={contestant.photograph} alt={contestant.stageName||contestant.fullName}/>:String(index+1).padStart(2,"0")}</div><span>{contestant.category}</span><h4>{contestant.stageName||contestant.fullName}</h4><p>{contestant.entryTitle}</p><div className="vote-row"><strong>{contestant.voteCount||0} votes</strong><button onClick={()=>voteFor(contestant._id)} disabled={schedule?.published===false||schedule?.status!=="voting"}>{schedule?.status==="voting"?"Vote now":schedule?.status==="registration"?"Voting opens at 8 AM":"Voting closed"}</button></div></article>)}</div>:<div className="empty-contestants"><b>Contestants are being reviewed.</b><p>Approved entries will appear here before voting opens.</p></div>}
         <div className="route-title"><span>PAST WINNERS</span><h2>Creator hall of fame</h2></div>
         <div className="past-winners-grid">
           {[["Academician Kibet OGW","Challenge Winner"],["Ann Cheroo","Challenge Winner"],["Caleb Junior","Challenge Winner"]].map(([name,award])=><article key={name}><b>JISHINDIE</b><h3>{name}</h3><p>{award}</p></article>)}

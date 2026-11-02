@@ -45,6 +45,8 @@ export async function getChallengeSchedule(challengeSlug: string, now = new Date
       challengeSlug,
       title: challengeSlug === "kapsokwony-annual-run" ? "Kapsokwony Annual Run" : "Weekly Jishindie Challenge",
       challengeType: "creative",
+      description: "",
+      published: true,
       prizeSummary: "",
     };
   }
@@ -70,6 +72,8 @@ export async function getChallengeSchedule(challengeSlug: string, now = new Date
     challengeSlug: config.challengeSlug,
     title: config.title,
     challengeType: config.challengeType,
+    description: config.description || "",
+    published: config.published !== false,
     registrationStartsAt,
     registrationEndsAt,
     votingStartsAt,

@@ -161,6 +161,8 @@ const ChallengeSettingsSchema = new Schema({
   challengeSlug: { type: String, required: true, unique: true, trim: true, lowercase: true },
   title: { type: String, required: true, trim: true },
   challengeType: { type: String, enum: ["tshirt", "seasonal", "game_night", "creative", "custom"], default: "creative" },
+  description: { type: String, default: "", trim: true, maxlength: 2000 },
+  published: { type: Boolean, default: true, index: true },
   registrationStartsAt: { type: Date, required: true },
   registrationEndsAt: { type: Date, required: true },
   votingStartsAt: { type: Date, required: true },
@@ -218,6 +220,7 @@ const ShopOrderSchema = new Schema({
   customerName: { type: String, required: true, trim: true, maxlength: 120 },
   email: { type: String, required: true, lowercase: true, trim: true },
   phone: { type: String, required: true, trim: true, maxlength: 32 },
+  deliveryMethod: { type: String, enum: ["delivery", "pickup"], default: "delivery" },
   deliveryAddress: { type: String, default: "", trim: true, maxlength: 1000 },
   items: [{
     productId: { type: Schema.Types.ObjectId, ref: "ShopProduct", required: true },
@@ -226,6 +229,12 @@ const ShopOrderSchema = new Schema({
     quantity: { type: Number, required: true, min: 1 },
   }],
   total: { type: Number, required: true, min: 0 },
+  paymentMethod: { type: String, enum: ["mpesa"], default: "mpesa" },
+  paymentStatus: { type: String, enum: ["initiating", "pending", "paid", "failed"], default: "initiating", index: true },
+  mpesaCheckoutRequestId: { type: String, default: "", index: true },
+  mpesaMerchantRequestId: { type: String, default: "" },
+  mpesaReceiptNumber: { type: String, default: "" },
+  paymentResult: { type: String, default: "", maxlength: 500 },
   status: { type: String, enum: ["pending", "confirmed", "fulfilled", "cancelled"], default: "pending", index: true },
 }, { timestamps: true });
 
