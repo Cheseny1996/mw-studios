@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
+import { connection, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import { CandidateModel, ElectionModel, VoteModel } from "@/lib/models";
 
 export async function GET() {
+  await connection();
   await connectToDatabase();
   const now = new Date();
   const election = await ElectionModel.findOne({ endAt: { $gte: now } }).sort({ startAt: 1 }) ?? await ElectionModel.findOne().sort({ startAt: -1 });

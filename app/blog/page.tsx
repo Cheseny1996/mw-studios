@@ -1,23 +1,38 @@
-"use client";
-
+import type { Metadata } from "next";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { connection } from "next/server";
+import { Suspense } from "react";
+import { connectToDatabase } from "@/lib/db";
+import { ContentModel } from "@/lib/models";
 
-const fallbackPosts = [
-  ["kapsokwony-annual-run-announced", "Kapsokwony Annual Run Announced", "December 15, 2024", "MzimaWells Studios highlights the famous annual Kapsokwony community run."],
-  ["jishindie-challenge-winners-announced", "Jishindie Challenge Winners Announced", "December 10, 2024", "Community voting celebrates talented creators from across the competition categories."],
-  ["behind-the-scenes-latest-music-video-production", "Behind the Scenes: Latest Music Video Production", "December 5, 2024", "A look inside the planning, filming, editing, and collaboration behind our latest production."],
-  ["community-outreach-program-success", "Community Outreach Program Success", "November 28, 2024", "More than 500 young creatives joined outreach activities across film, media, music, and digital storytelling."],
-] as const;
+type BlogPost = {
+  slug: string;
+  title: string;
+  excerpt?: string;
+  publishedAt?: Date | string;
+};
 
-export default function BlogPage() {
-  const [posts, setPosts] = useState<Array<{ slug: string; title: string; excerpt?: string; publishedAt?: Date | string }>>([]);
-  useEffect(() => {
-    fetch("/api/public/posts").then((response) => response.ok ? response.json() : null).then((data) => {
-      if (data?.posts?.length) setPosts(data.posts);
-    }).catch(() => undefined);
-  }, []);
-  const displayedPosts = posts.length ? posts : fallbackPosts.map(([slug, title, date, excerpt]) => ({ slug, title, excerpt, publishedAt: date }));
+const fallbackPosts: BlogPost[] = [
+  { slug: "kapsokwony-annual-run-announced", title: "Kapsokwony Annual Run Announced", publishedAt: "December 15, 2024", excerpt: "MzimaWells Studios highlights the famous annual Kapsokwony community run." },
+  { slug: "jishindie-challenge-winners-announced", title: "Jishindie Challenge Winners Announced", publishedAt: "December 10, 2024", excerpt: "Community voting celebrates talented creators from across the competition categories." },
+  { slug: "behind-the-scenes-latest-music-video-production", title: "Behind the Scenes: Latest Music Video Production", publishedAt: "December 5, 2024", excerpt: "A look inside the planning, filming, editing, and collaboration behind our latest production." },
+  { slug: "community-outreach-program-success", title: "Community Outreach Program Success", publishedAt: "November 28, 2024", excerpt: "More than 500 young creatives joined outreach activities across film, media, music, and digital storytelling." },
+];
+
+export const metadata: Metadata = {
+  title: "MzimaWells Journal | Stories, People and Creative Ideas",
+  description: "Read articles, announcements and stories about African creativity, MzimaWells Studios, community events and Jishindie.",
+  alternates: { canonical: "/blog" },
+};
+
+async function BlogContent() {
+  await connection();
+  await connectToDatabase();
+  const posts = await ContentModel.find(
+    { type: "post", status: "published" },
+    { slug: 1, title: 1, excerpt: 1, publishedAt: 1 },
+  ).sort({ publishedAt: -1 }).lean<BlogPost[]>();
+  const displayedPosts = posts.length ? posts : fallbackPosts;
 
   return (
     <main className="inner-page">
@@ -33,4 +48,8 @@ export default function BlogPage() {
       </section>
     </main>
   );
+}
+
+export default function BlogPage() {
+  return <Suspense fallback={<main className="inner-page"><p className="story-deck">Loading the journal...</p></main>}><BlogContent /></Suspense>;
 }

@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server";
+import { connection, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 
 export async function GET() {
+  await connection();
   try {
     const mongoose = await connectToDatabase();
     return NextResponse.json({

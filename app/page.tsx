@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 
 const news = [
@@ -236,6 +237,25 @@ export default function Home() {
           </div>
         </section>
 
+        <section className="mw-section team-section" id="team">
+          <div className="section-title"><h2>Our Team</h2><p>Meet the creative minds behind MzimaWells Studios</p></div>
+          <div className="home-crew-grid">
+            {[
+              ["Dokta Will","Creative Director","/crew/dokta-will.jpeg"],
+              ["Director Brian K","Production Director","/crew/director-brian-k.jpeg"],
+              ["Director Abel Kibet","Content Director","/crew/director-abel-kibet.jpeg"],
+              ["Duke Of Nomcity","Technical Director","/crew/director-duke-of-nomcity.jpeg"],
+            ].map(([name,designation,photo])=>(
+              <article key={name}>
+                <Image src={photo} alt={`${name}, ${designation}`} width={500} height={600}/>
+                <h3>{name}</h3>
+                <p>{designation}</p>
+              </article>
+            ))}
+          </div>
+          <div className="title-actions"><a href="/team">Meet the team</a><Link href="/careers">View careers</Link></div>
+        </section>
+
         <section className="mw-section what-section" id="what-we-do">
           <h2>What We Do</h2>
           <div className="what-grid">
@@ -260,7 +280,7 @@ export default function Home() {
         </section>
 
         <section className="mw-section jishindie-section-page" id="jishindie">
-          <div className="section-title jishindie-heading"><span className="live-pill">THIS WEEK'S CHALLENGE</span><h2>Jishindie Challenge</h2><p>Register. Create. Compete. Get voted. Win MzimaWells prizes.</p></div>
+          <div className="section-title jishindie-heading"><span className="live-pill">THIS WEEK&apos;S CHALLENGE</span><h2>Jishindie Challenge</h2><p>Register. Create. Compete. Get voted. Win MzimaWells prizes.</p></div>
           <div className="challenge-banner">
             <div><span>WEEKLY CREATOR CHALLENGE</span><h3>Show your talent. Become a fan favourite.</h3><p>Open to artists, dancers, filmmakers, comedians, fashion creators and digital storytellers.</p></div>
             <button onClick={openChallengeRegistration}>Register to compete <b>→</b></button>
@@ -309,24 +329,6 @@ export default function Home() {
           <div className="title-actions"><a href="/about">Discover our story</a></div>
         </section>
 
-        <section className="mw-section team-section" id="team">
-          <div className="section-title"><h2>Our Team</h2><p>Meet the creative minds behind MzimaWells Studios</p></div>
-          <div className="home-crew-grid">
-            {[
-              ["Dokta Will","Creative Director","/crew/dokta-will.jpeg"],
-              ["Director Brian K","Production Director","/crew/director-brian-k.jpeg"],
-              ["Director Abel Kibet","Content Director","/crew/director-abel-kibet.jpeg"],
-              ["Duke Of Nomcity","Technical Director","/crew/director-duke-of-nomcity.jpeg"],
-            ].map(([name,designation,photo])=>(
-              <article key={name}>
-                <Image src={photo} alt={`${name}, ${designation}`} width={500} height={600}/>
-                <h3>{name}</h3>
-                <p>{designation}</p>
-              </article>
-            ))}
-          </div>
-          <div className="title-actions"><a href="/team">Meet the team</a><a href="/careers">View careers</a></div>
-        </section>
       </main>
 
       <footer className="mw-footer">

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { connection, NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import crypto from "crypto";
 import { connectToDatabase } from "@/lib/db";
@@ -40,6 +40,7 @@ export function getJishindieSchedule(now = new Date()) {
 }
 
 export async function GET(request: NextRequest) {
+  await connection();
   await connectToDatabase();
   const slug = request.nextUrl.searchParams.get("challenge") || "weekly-jishindie";
   const [registered, allEntries, approved, totals] = await Promise.all([

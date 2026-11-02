@@ -4,6 +4,29 @@ import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 
 type StaffUser = { _id: string; fullName: string; email: string; role: string; department?: string };
+type ArticleBlock = { id: string; kind: "heading" | "paragraph"; level: number; text: string };
+
+function createArticleBlock(kind: ArticleBlock["kind"], level = 2): ArticleBlock {
+  return { id: crypto.randomUUID(), kind, level, text: "" };
+}
+
+function readArticleBlocks(metadata: unknown): ArticleBlock[] {
+  if (!metadata || typeof metadata !== "object" || !("contentBlocks" in metadata)) return [createArticleBlock("paragraph")];
+  const blocks = (metadata as { contentBlocks?: unknown }).contentBlocks;
+  if (!Array.isArray(blocks)) return [createArticleBlock("paragraph")];
+  const validBlocks = blocks.flatMap((block): ArticleBlock[] => {
+    if (!block || typeof block !== "object") return [];
+    const candidate = block as Partial<ArticleBlock>;
+    if (!["heading", "paragraph"].includes(String(candidate.kind)) || typeof candidate.text !== "string") return [];
+    return [{
+      id: crypto.randomUUID(),
+      kind: candidate.kind as ArticleBlock["kind"],
+      level: Math.min(6, Math.max(1, Number(candidate.level) || 2)),
+      text: candidate.text,
+    }];
+  });
+  return validBlocks.length ? validBlocks : [createArticleBlock("paragraph")];
+}
 
 const roleTabs: Record<string, string[]> = {
   super_admin: ["overview", "posts", "events", "opportunities", "jishindie", "users"],
@@ -30,6 +53,8 @@ export default function AdminPage() {
   const [departments, setDepartments] = useState<string[]>([]);
   const [items, setItems] = useState<Array<Record<string, unknown>>>([]);
   const [editingId, setEditingId] = useState("");
+  const [articleBlocks, setArticleBlocks] = useState<ArticleBlock[]>([{ id: "initial-paragraph", kind: "paragraph", level: 2, text: "" }]);
+  const [newHeadingLevel, setNewHeadingLevel] = useState(2);
 
   async function adminLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -79,12 +104,29 @@ export default function AdminPage() {
   async function savePost(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
-    const body = Object.fromEntries(new FormData(form));
-    const response = await fetch("/api/admin/posts", { method: editingId ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(editingId ? { ...body, id: editingId } : body) });
-    const data = await response.json().catch(() => ({}));
-    setNotice(response.ok ? `Post ${body.status === "published" ? "published" : "saved"} successfully.` : data.error || "Could not save post.");
-    if (response.ok) { form.reset(); setEditingId(""); }
-    loadTab("posts");
+    const fields = Object.fromEntries(new FormData(form));
+    const body = {
+      ...fields,
+      tags: String(fields.tags || "").split(/[,\n]/).map((tag) => tag.trim()).filter(Boolean),
+      contentBlocks: articleBlocks.map(({ kind, level, text }) => ({ kind, level, text: text.trim() })),
+      body: articleBlocks.map((block) => block.text.trim()).filter(Boolean).join("\n\n"),
+    };
+    const status = String(fields.status || "draft");
+    try {
+      const response = await fetch("/api/admin/posts", { method: editingId ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(editingId ? { ...body, id: editingId } : body) });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setNotice(data.error || "Could not save post.");
+        return;
+      }
+      setNotice(`Post ${status === "published" ? "published" : "saved"} successfully.`);
+      form.reset();
+      setArticleBlocks([createArticleBlock("paragraph")]);
+      setEditingId("");
+      await loadTab("posts");
+    } catch {
+      setNotice("Could not connect to the admin service. Please try again.");
+    }
   }
 
   async function saveEvent(event: FormEvent<HTMLFormElement>) {
@@ -171,6 +213,32 @@ export default function AdminPage() {
     });
   }
 
+  function editPost(item: Record<string, unknown>) {
+    setEditingId(String(item._id || ""));
+    setArticleBlocks(readArticleBlocks(item.metadata));
+    window.requestAnimationFrame(() => {
+      const form = document.querySelector<HTMLFormElement>(".post-editor-form");
+      if (!form) return;
+      const metadata = item.metadata && typeof item.metadata === "object"
+        ? item.metadata as { seoTitle?: string; metaDescription?: string; tags?: string[] }
+        : {};
+      const values: Record<string, string> = {
+        title: String(item.title || ""),
+        slug: String(item.slug || ""),
+        excerpt: String(item.excerpt || ""),
+        status: String(item.status || "draft"),
+        seoTitle: String(metadata.seoTitle || ""),
+        metaDescription: String(metadata.metaDescription || ""),
+        tags: Array.isArray(metadata.tags) ? metadata.tags.join(", ") : "",
+      };
+      Object.entries(values).forEach(([name, value]) => {
+        const field = form.elements.namedItem(name);
+        if (field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement || field instanceof HTMLSelectElement) field.value = value;
+      });
+      form.scrollIntoView({ behavior: "smooth" });
+    });
+  }
+
   if (!staff) return (
     <main className="admin-denied">
       <span>MW STAFF CONSOLE</span>
@@ -197,7 +265,53 @@ export default function AdminPage() {
           {staff.role === "super_admin" && <article><span>STAFF</span><h2>Delegate responsibilities</h2><p>Assign staff roles and departments using registered email addresses.</p><button onClick={() => setTab("users")}>Manage staff →</button></article>}
           {roleTabs[staff.role]?.length === 1 && <article><span>WORKSPACE</span><h2>No tools assigned yet</h2><p>Contact the super administrator to request access to a management workspace.</p></article>}
         </div>}
-        {tab === "posts" && <div className="admin-panel"><h2>{editingId ? "Edit blog post" : "New blog post"}</h2><form className="admin-form" onSubmit={savePost}><input name="title" placeholder="Story title" required /><input name="slug" placeholder="Permalink slug (optional)" /><input name="excerpt" placeholder="Short summary" /><textarea name="body" placeholder="Full story body" rows={9} /><select name="status"><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select><button>{editingId ? "Update post" : "Save / publish post"}</button>{editingId && <button type="button" onClick={() => { setEditingId(""); loadTab("posts"); }}>Cancel editing</button>}</form><div className="admin-item-list">{items.map((item)=><div key={String(item._id)}><p><b>{String(item.title)}</b><span>{String(item.status)}</span></p><div><button onClick={()=>editItem(item)}>Edit</button><button className="danger-button" onClick={()=>deleteItem("posts",String(item._id))}>Delete</button></div></div>)}</div></div>}
+        {tab === "posts" && <div className="admin-panel post-admin-panel">
+          <div className="post-admin-heading"><div><span className="admin-eyebrow">JOURNAL PUBLISHING</span><h2>{editingId ? "Edit article" : "Write a new article"}</h2><p>Write a complete story, organize its headings, and prepare search metadata before publishing.</p></div></div>
+          <form className="admin-form post-editor-form" onSubmit={savePost}>
+            <section className="post-editor-section">
+              <h3>Article details</h3>
+              <label>Article title (page H1)<input name="title" placeholder="A clear, descriptive title" required maxLength={180} /></label>
+              <label>URL slug<input name="slug" placeholder="Automatically created from the title if blank" maxLength={180} /></label>
+              <label>Short introduction<textarea name="excerpt" placeholder="A useful summary shown on the journal and article page" rows={3} maxLength={320} /></label>
+            </section>
+            <section className="post-editor-section">
+              <div className="post-section-heading"><div><h3>Article content</h3><p>Add as many paragraphs and headings as needed. The article title is the recommended H1; use H2–H6 to organize sections beneath it.</p></div>
+                <div className="post-block-actions">
+                  <button type="button" onClick={() => setArticleBlocks((blocks) => [...blocks, createArticleBlock("paragraph")])}>Add paragraph</button>
+                  <label className="post-heading-add">Heading level<select aria-label="New heading level" value={newHeadingLevel} onChange={(event) => setNewHeadingLevel(Number(event.target.value))}>{[1, 2, 3, 4, 5, 6].map((level) => <option key={level} value={level}>H{level}</option>)}</select></label>
+                  <button type="button" onClick={() => setArticleBlocks((blocks) => [...blocks, createArticleBlock("heading", newHeadingLevel)])}>Add heading</button>
+                </div>
+              </div>
+              <div className="post-block-list">
+                {articleBlocks.map((block, index) => (
+                  <article className="post-content-block" key={block.id}>
+                    <div className="post-content-block-heading">
+                      <strong>{block.kind === "heading" ? `Heading H${block.level}` : "Paragraph"}</strong>
+                      <button type="button" aria-label={`Delete ${block.kind} ${index + 1}`} onClick={() => setArticleBlocks((blocks) => blocks.filter((candidate) => candidate.id !== block.id))}>Delete block</button>
+                    </div>
+                    {block.kind === "heading" && <label>Heading level<select aria-label={`Heading level for block ${index + 1}`} value={block.level} onChange={(event) => setArticleBlocks((blocks) => blocks.map((candidate) => candidate.id === block.id ? { ...candidate, level: Number(event.target.value) } : candidate))}>{[1, 2, 3, 4, 5, 6].map((level) => <option key={level} value={level}>Heading {level} (H{level})</option>)}</select></label>}
+                    <label className="post-block-text">{block.kind === "heading" ? "Heading text" : "Paragraph text"}<textarea aria-label={`${block.kind === "heading" ? `Heading H${block.level}` : "Paragraph"} content ${index + 1}`} rows={block.kind === "heading" ? 2 : 5} placeholder={block.kind === "heading" ? "Write a section heading" : "Write a paragraph"} value={block.text} onChange={(event) => setArticleBlocks((blocks) => blocks.map((candidate) => candidate.id === block.id ? { ...candidate, text: event.target.value } : candidate))} /></label>
+                  </article>
+                ))}
+              </div>
+            </section>
+            <section className="post-editor-section">
+              <h3>Search engine preview (SEO)</h3>
+              <p>These fields help search engines and social previews describe your article. They don’t guarantee rankings or indexing.</p>
+              <label>SEO title<input name="seoTitle" placeholder="Optional; defaults to the article title" maxLength={180} /></label>
+              <label>Meta description<textarea name="metaDescription" placeholder="A concise, accurate summary for search results (recommended: 150–160 characters)" rows={3} maxLength={320} /></label>
+              <label>Tags<input name="tags" placeholder="Separate tags with commas, e.g. Kapsokwony, community, events" /></label>
+            </section>
+            <section className="post-editor-section post-publish-section">
+              <label>Publication status<select name="status" defaultValue="draft"><option value="draft">Save as draft</option><option value="published">Publish article</option><option value="archived">Archive article</option></select></label>
+              <div className="post-publish-actions"><button type="submit">{editingId ? "Save article changes" : "Save article"}</button>{editingId && <button type="button" onClick={() => { setEditingId(""); setArticleBlocks([createArticleBlock("paragraph")]); loadTab("posts"); }}>Cancel editing</button>}</div>
+            </section>
+          </form>
+          <section className="post-list-section"><h3>Saved articles</h3><div className="admin-item-list">{items.map((item) => {
+            const metadata = item.metadata && typeof item.metadata === "object" ? item.metadata as { seoTitle?: string; tags?: string[] } : {};
+            return <div key={String(item._id)}><p><b>{String(item.title)}</b><span>{String(item.status)}{metadata.seoTitle ? ` · SEO: ${metadata.seoTitle}` : ""}{Array.isArray(metadata.tags) && metadata.tags.length ? ` · ${metadata.tags.join(", ")}` : ""}</span></p><div><button onClick={() => editPost(item)}>Edit</button><button className="danger-button" onClick={() => deleteItem("posts", String(item._id))}>Delete</button></div></div>;
+          })}</div></section>
+        </div>}
         {tab === "events" && <div className="admin-panel"><h2>{editingId ? "Edit event" : "New event"}</h2><form className="admin-form" onSubmit={saveEvent}><input name="title" placeholder="Event title" required /><input name="slug" placeholder="Permalink slug (optional)" /><input name="date" type="datetime-local" required /><input name="time" placeholder="Time, e.g. 7:00 PM" /><input name="location" placeholder="Location" /><input name="capacity" type="number" min="0" placeholder="Capacity" /><textarea name="description" placeholder="Event description" rows={7} /><select name="status"><option value="draft">Draft</option><option value="published">Published</option><option value="cancelled">Cancelled</option></select><button>{editingId ? "Update event" : "Save / publish event"}</button>{editingId && <button type="button" onClick={() => { setEditingId(""); loadTab("events"); }}>Cancel editing</button>}</form><div className="admin-item-list">{items.map((item)=><div key={String(item._id)}><p><b>{String(item.title)}</b><span>{String(item.status)} · {String(item.location || "")}</span></p><div><button onClick={()=>editItem(item)}>Edit</button><button className="danger-button" onClick={()=>deleteItem("events",String(item._id))}>Delete</button></div></div>)}</div></div>}
         {tab === "opportunities" && <div className="admin-panel"><h2>{editingId ? "Edit career opportunity" : "New career opportunity"}</h2><form className="admin-form" onSubmit={saveOpportunity}><input name="title" placeholder="Job title" required /><input name="slug" placeholder="Permalink slug (optional)" /><select name="department"><option value="hr">HR</option><option value="creative">Creative</option><option value="production">Production</option><option value="communications">Communications</option><option value="events">Events</option><option value="technology">Technology</option><option value="other">Other</option></select><input name="location" placeholder="Location" /><input name="employmentType" placeholder="Employment type" /><input name="applicationEmail" type="email" placeholder="Application email" /><input name="applicationUrl" placeholder="Application URL (optional)" /><textarea name="summary" placeholder="Opportunity summary" rows={4} /><textarea name="description" placeholder="Role description" rows={5} /><textarea name="requirements" placeholder="Requirements" rows={5} /><select name="status"><option value="draft">Draft</option><option value="published">Published</option><option value="closed">Closed</option></select><button>{editingId ? "Update opportunity" : "Save / publish opportunity"}</button>{editingId && <button type="button" onClick={() => { setEditingId(""); loadTab("opportunities"); }}>Cancel editing</button>}</form><div className="admin-item-list">{items.map((item)=><div key={String(item._id)}><p><b>{String(item.title)}</b><span>{String(item.status)} · {String(item.location || "")}</span></p><div><button onClick={()=>editItem(item)}>Edit</button><button className="danger-button" onClick={()=>deleteItem("opportunities",String(item._id))}>Delete</button></div></div>)}</div></div>}
         {tab === "jishindie" && <div className="admin-panel"><h2>Jishindie registrations</h2><div className="staff-table">{items.map((entry) => <div key={String(entry._id)}><p><b>{String(entry.stageName || entry.fullName)}</b><span>{String(entry.category)} · {String(entry.status)} · {String(entry.email || "")}</span></p><select value={String(entry.status)} onChange={(event) => updateJishindieEntry(String(entry._id), event.target.value)}><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select></div>)}</div></div>}

@@ -13,6 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://mw-studios.vercel.app"),
   title: "Mzima Wells Studios | Changing the Narrative",
   description:
     "Stories that matter. Creativity without boundaries. Discover events, Jishindie, stories and the Mzima Wells community.",

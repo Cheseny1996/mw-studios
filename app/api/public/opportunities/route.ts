@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { connection } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import { OpportunityModel } from "@/lib/models";
 
 export async function GET(request: NextRequest) {
+  await connection();
   await connectToDatabase();
   const slug = request.nextUrl.searchParams.get("slug");
   if (slug) {
