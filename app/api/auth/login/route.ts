@@ -1,0 +1,24 @@
+import { NextRequest, NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
+import { z } from "zod";
+import { connectToDatabase } from "@/lib/db";
+import { UserModel } from "@/lib/models";
+import { createSession } from "@/lib/auth";
+
+const schema = z.object({
+  email: z.string().trim().email(),
+  password: z.string().min(12).max(128),
+});
+
+export async function POST(request: NextRequest) {
+  const parsed = schema.safeParse(await request.json().catch(() => null));
+  if (!parsed.success) return NextResponse.json({ error: "Enter a valid email and password." }, { status: 400 });
+  await connectToDatabase();
+  const user = await UserModel.findOne({ email: parsed.data.email.toLowerCase() });
+  if (!user || !(await bcrypt.compare(parsed.data.password, user.passwordHash))) {
+    return NextResponse.json({ error: "Invalid email or password." }, { status: 401 });
+  }
+  if (user.status !== "active") return NextResponse.json({ error: "This account is unavailable." }, { status: 403 });
+  await createSession(user);
+  return NextResponse.json({ user: { id: user._id, name: user.fullName, email: user.email, role: user.role } });
+}

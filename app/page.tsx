@@ -3,150 +3,171 @@
 import Image from "next/image";
 import { useState } from "react";
 
-const navItems = [
-  ["About Us", "/about"],
-  ["What We Do", "/programmes"],
-  ["Our Crew", "/crew"],
-  ["Events", "/events"],
-  ["Jishindie", "/jishindie"],
-  ["Stories", "/stories"],
-  ["Gallery", "/gallery"],
-  ["Shop", "/shop"],
-];
+const news = [
+  ["MzimaWells Studios Launches New Podcast Series", "December 15, 2024", "Exciting new content coming your way with K-Run Podcast exploring stories from across the continent.", true],
+  ["Jishindie Challenge Winners Announced", "December 10, 2024", "Congratulations to all the talented creators who participated in this season's competition.", true],
+  ["Behind the Scenes: Latest Music Video Production", "December 5, 2024", "Take a look at our creative process for the latest music video project.", false],
+  ["Community Outreach Program Success", "November 28, 2024", "Our recent community engagement initiative reached over 500 young creatives.", false],
+  ["New Studio Equipment Upgrade", "November 20, 2024", "We invested in state-of-the-art equipment to deliver even better quality content.", false],
+  ["Upcoming Events Calendar Released", "November 15, 2024", "Mark your calendars for our exciting lineup of events in the coming months.", false],
+] as const;
+
+const episodes = [
+  ["The Future of African Entertainment", "December 18, 2024", "45:30", "Join us as we explore the rapidly evolving entertainment landscape across Africa."],
+  ["Creative Entrepreneurship with Local Artists", "December 11, 2024", "38:15", "Inspiring conversations with artists who are building successful creative businesses."],
+  ["Behind the Mic: Producer Stories", "December 4, 2024", "52:20", "Top music producers share their journey and creative process."],
+  ["Youth and Digital Media", "November 27, 2024", "41:45", "How young creators are using digital platforms to amplify their voices."],
+  ["The Power of Community in Content Creation", "November 20, 2024", "47:10", "Building authentic connections through content and community engagement."],
+  ["From Studio to Screen: Film Production Insights", "November 13, 2024", "55:30", "Industry professionals discuss the art and business of film production."],
+] as const;
+
+const events = [
+  ["Plat4m Podcast Live Recording", "January 22, 2025", "7:00 PM - 9:00 PM", "City Hall, Nairobi", "Be part of our live podcast recording with special celebrity guests.", 120],
+  ["Weekly Jishindie T-Shirt Challenge - Season 3 Round 5", "January 25, 2025", "8:00 AM - 8:59 PM", "Online / MzimaWells Studios", "Teams compete for recognition and prizes. Team Fearless Force leads with 4005 votes!", 500],
+  ["Jishindie Challenge Finals", "February 5, 2025", "4:00 PM - 8:00 PM", "National Theater, Nairobi", "Watch the top finalists compete for the grand prize in our creative competition.", 250],
+  ["Creative Minds Workshop", "February 15, 2025", "2:00 PM - 6:00 PM", "MzimaWells Studios, Nairobi", "An interactive workshop on content creation and digital storytelling.", 45],
+] as const;
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
+  const nav = [
+    ["Home", "#home"],
+    ["News", "#news"],
+    ["K-Run Podcast", "#podcast"],
+    ["Events", "#events"],
+    ["Jishindie", "#jishindie"],
+    ["About", "#about"],
+    ["Team", "#team"],
+  ];
 
   return (
-    <div className="site-shell">
-      <header className="topbar">
-        <a className="brand" href="/" aria-label="Mzima Wells Studios home">
-          <Image src="/mzima-wells-logo.png" alt="" width={58} height={58} priority />
-          <span>Mzima Wells</span>
+    <div className="mw-site">
+      <header className="mw-header">
+        <a className="mw-brand" href="#home" aria-label="MzimaWells Studios">
+          <Image src="/mzima-wells-logo.png" alt="" width={44} height={44} priority />
+          <h1>MzimaWells Studios</h1>
         </a>
-        <nav className={menuOpen ? "nav nav-open" : "nav"} aria-label="Primary navigation">
-          {navItems.map(([label, href]) => (
-            <a key={href} href={href} onClick={() => setMenuOpen(false)}>{label}</a>
-          ))}
+        <nav className={menuOpen ? "mw-nav open" : "mw-nav"} aria-label="Primary navigation">
+          {nav.map(([label, href]) => <a key={href} href={href} onClick={() => setMenuOpen(false)}>{label}</a>)}
         </nav>
-        <div className="header-actions">
-          <button className="icon-button" aria-label="Search" onClick={() => setSearchOpen(true)}>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m1.35-5.15a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0Z" /></svg>
-          </button>
-          <a className="cart-button" href="/cart" aria-label="Shopping cart">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h2l2.4 11.2a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.6L21 7H6M9 20h.01M17 20h.01" /></svg>
-          </a>
-          <a className="ticket-button" href="/events">Get Tickets</a>
-          <button className="menu-button" aria-label="Toggle menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((v) => !v)}>
-            <span /><span /><span />
-          </button>
-        </div>
+        <button className="mw-menu" aria-label="Toggle navigation" aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}>
+          <span /><span /><span />
+        </button>
       </header>
 
-      {searchOpen && (
-        <div className="search-overlay" role="dialog" aria-modal="true" aria-label="Search Mzima Wells">
-          <button className="search-close" aria-label="Close search" onClick={() => setSearchOpen(false)}>×</button>
-          <form action="/search">
-            <label htmlFor="site-search">Search Mzima Wells</label>
-            <div>
-              <input id="site-search" name="q" type="search" placeholder="Events, stories, programmes..." autoFocus />
-              <button type="submit">Search</button>
-            </div>
-          </form>
-        </div>
-      )}
-
       <main>
-        <section className="hero">
-          <div className="hero-mark" aria-hidden="true">
-            <Image src="/mzima-wells-logo.png" alt="" fill priority sizes="(max-width: 760px) 240px, 440px" />
-          </div>
-          <div className="hero-content">
-            <p className="eyebrow">Mzima Wells Studios</p>
-            <h1>Changing<br />the Narrative.</h1>
-            <p className="hero-copy">Stories that matter. Creativity without boundaries. People creating impact.</p>
-            <div className="hero-actions">
-              <a className="primary-button" href="/about">Explore Mzima Wells</a>
-              <a className="secondary-button" href="/events">Discover Events</a>
-              <a className="text-button" href="/community">Join the Movement <span>↗</span></a>
-            </div>
-          </div>
-          <a className="scroll-cue" href="#who-we-are" aria-label="Scroll to Who We Are">Explore <span>↓</span></a>
-        </section>
-
-        <section className="intro-section" id="who-we-are">
-          <div><p className="eyebrow dark-eyebrow">Who We Are</p><h2>Platforms for voices, talent and positive change.</h2></div>
-          <div className="intro-copy">
-            <p>Mzima Wells brings people, creativity and community together through media, culture, events and technology.</p>
-            <a href="/about">Discover our story <span>→</span></a>
+        <section className="mw-hero" id="home">
+          <div>
+            <h2>Welcome to MzimaWells Studios</h2>
+            <p>Where Creativity Flows and Stories Come to Life</p>
+            <a href="#what-we-do">Explore Our Work</a>
           </div>
         </section>
 
-        <section className="programmes-section">
-          <div className="section-heading">
-            <div><p className="eyebrow">What We Do</p><h2>Our creative world</h2></div>
-            <a href="/programmes">View all programmes <span>→</span></a>
-          </div>
-          <div className="programme-grid">
+        <section className="mw-section what-section" id="what-we-do">
+          <h2>What We Do</h2>
+          <div className="what-grid">
             {[
-              ["01", "Creative Media", "Media, film and photography that move ideas forward."],
-              ["02", "Talent Development", "Platforms designed to discover and develop creative talent."],
-              ["03", "Events & Culture", "Shared experiences that celebrate culture and community."],
-              ["04", "Technology & Innovation", "Digital tools and campaigns for meaningful participation."],
-            ].map(([number, title, copy]) => (
-              <article key={title}><span>{number}</span><h3>{title}</h3><p>{copy}</p><a href="/programmes" aria-label={`Explore ${title}`}>↗</a></article>
+              ["▶", "Video Production", "Professional video production services for music videos, commercials, and documentaries."],
+              ["●", "Podcasting", "K-Run Podcast brings you the latest in entertainment, culture, and inspiration."],
+              ["▣", "Events", "Creating memorable experiences through professional event coverage and management."],
+              ["♛", "Jishindie Challenge", "Empowering creators through our innovative creative competition platform."],
+            ].map(([icon, title, copy]) => (
+              <article key={title}><span className="what-icon">{icon}</span><h3>{title}</h3><p>{copy}</p></article>
             ))}
           </div>
         </section>
 
-        <section className="jishindie-section">
-          <div className="jishindie-copy">
-            <p className="eyebrow dark-eyebrow">Jishindie</p>
-            <h2>Your voice.<br />Your choice.<br /><em>Your community.</em></h2>
-            <p>Take part in Mzima Wells’ weekly community vote. Every eligible account has one voice.</p>
-            <div className="hero-actions">
-              <a className="orange-button" href="/jishindie/register">Register to Vote</a>
-              <a className="secondary-button light-button" href="/jishindie/live">View Live Voting</a>
-            </div>
-          </div>
-          <div className="jishindie-status">
-            <span className="status-dot" />
-            <div><small>Weekly election</small><strong>JISHINDIE REGISTRATION IS OPEN</strong><p>Sunday voting · 08:30–21:30 EAT</p></div>
+        <section className="mw-mission">
+          <h2>Our Mission</h2>
+          <p>We believe in the power of storytelling to inspire, educate, and connect communities. We are committed to producing high-quality content that resonates with audiences and creates lasting impact.</p>
+        </section>
+
+        <section className="mw-section news-section" id="news">
+          <div className="section-title"><h2>Latest News</h2><p>Stay updated with the latest from MzimaWells Studios</p></div>
+          <div className="news-grid">
+            {news.map(([title, date, copy, trending], index) => (
+              <article className="news-card" key={title}>
+                <div className={`card-art art-${index}`}><span>MzimaWells</span>{trending && <b>Trending</b>}</div>
+                <div className="card-body"><time>{date}</time><h3>{title}</h3><p>{copy}</p><button>Read More →</button></div>
+              </article>
+            ))}
           </div>
         </section>
 
-        <section className="events-section">
-          <div className="section-heading">
-            <div><p className="eyebrow dark-eyebrow">What’s On</p><h2>Events & experiences</h2></div>
-            <a href="/events">Explore events <span>→</span></a>
-          </div>
-          <div className="empty-state">
-            <span>Upcoming programme</span><h3>Discover events as they are announced.</h3>
-            <p>Event details will be published here by the Mzima Wells team.</p><a href="/events">View event calendar</a>
+        <section className="mw-section podcast-section" id="podcast">
+          <div className="section-title"><h2>K-Run Podcast</h2><p>Conversations that inspire, educate, and entertain</p><div className="title-actions"><button>Subscribe Now</button><a href="#episodes">View All Episodes</a></div></div>
+          <div className="podcast-grid" id="episodes">
+            {episodes.map(([title, date, duration, copy], index) => (
+              <article className="podcast-card" key={title}>
+                <div className={`podcast-art podcast-art-${index}`}><span>K</span></div>
+                <div className="card-body"><time>{date} • {duration}</time><h3>{title}</h3><p>{copy}</p><div className="podcast-actions"><button>▶ &nbsp; Play Episode</button><button className="download">↓ &nbsp; Download</button></div></div>
+              </article>
+            ))}
           </div>
         </section>
 
-        <section className="newsletter-section">
-          <div><p className="eyebrow">Stay connected</p><h2>Be part of the next<br />Mzima Wells story.</h2></div>
-          <form action="/api/newsletter" method="post">
-            <label htmlFor="newsletter-email">Email address</label>
-            <div><input id="newsletter-email" name="email" type="email" placeholder="you@example.com" required /><button type="submit">Join the community →</button></div>
-          </form>
+        <section className="mw-section events-section-page" id="events">
+          <div className="section-title"><h2>Events</h2><p>Join us for exciting events and experiences</p></div>
+          <h3 className="subheading">Upcoming Events</h3>
+          <div className="events-grid">
+            {events.map(([title, date, time, location, copy, attendees], index) => (
+              <article className="event-card" key={title}>
+                <div className={`event-art event-art-${index}`}><span>{date.split(", ")[0]}</span></div>
+                <div className="card-body"><h3>{title}</h3><p>{copy}</p><ul><li>▣ {date}</li><li>◷ {time}</li><li>⌖ {location}</li><li>♙ {attendees} attendees registered</li></ul><button>Register Now</button></div>
+              </article>
+            ))}
+          </div>
+          <h3 className="subheading past-title">Past Events</h3>
+          <div className="past-grid">
+            {["Jishindie Season 3 Round 3 - Meet the Candidates", "Jishindie Season 3 Round 4 Championship", "Weekly Jishindie T-Shirt Challenge Round 2"].map((title, index) => (
+              <article key={title}><div className={`past-art past-art-${index}`} /><h3>{title}</h3><time>{["October 18, 2024", "December 15, 2024", "December 1, 2024"][index]}</time></article>
+            ))}
+          </div>
+        </section>
+
+        <section className="mw-section jishindie-section-page" id="jishindie">
+          <div className="section-title"><h2>Jishindie Challenge</h2><p>Empowering creators to showcase their talent and compete for recognition</p></div>
+          <div className="jishindie-about"><h3>What is Jishindie?</h3><p>Jishindie Challenge is our flagship creative competition for emerging artists, filmmakers, and content creators. It provides a stage to showcase work and empower talent through film, music, and digital content.</p></div>
+          <div className="stats">
+            {[["500+", "Participants"], ["50+", "Winners"], ["1000+", "Submissions"], ["$10K", "Prize Pool"]].map(([value, label]) => <div key={label}><strong>{value}</strong><span>{label}</span></div>)}
+          </div>
+          <h3 className="subheading">Recent Winners</h3>
+          <div className="winners">
+            {[["Academician Kibet OGW", "Team Strong"], ["Ann Cheroo", "Team Fearless Force"], ["Caleb Junior", "Team Strong"]].map(([name, team], index) => <article key={name}><div className={`winner-art winner-${index}`} /><h4>{name}</h4><p>{index ? "Weekly T-Shirt Challenge Winner" : "Weekly T-Shirt Challenge Champion"}</p><span>{team}</span></article>)}
+          </div>
+          <h3 className="subheading">How to Participate</h3>
+          <div className="steps">
+            {[["Register", "Sign up during the open period."], ["Create", "Develop content following the theme and guidelines."], ["Submit", "Upload your submission before the deadline."], ["Win", "Top entries receive prizes and industry opportunities."]].map(([title, copy], index) => <article key={title}><b>{index + 1}</b><div><h4>{title}</h4><p>{copy}</p></div></article>)}
+          </div>
+          <button className="register-button">Register for Next Challenge</button>
+        </section>
+
+        <section className="mw-section about-section" id="about">
+          <div className="section-title"><h2>About Us</h2><p>We are a creative content studio dedicated to telling authentic African stories through video, podcasting, and digital media.</p></div>
+          <div className="story"><div className="story-art">MzimaWells</div><div><h3>Our Story</h3><p>MzimaWells Studios was born from a passion for authentic storytelling and a vision to amplify African voices.</p><p>We have grown into a full-service creative studio producing music videos, documentaries, podcasts, and digital content.</p><p>Today, we continue to push creative boundaries while telling stories that matter and creating opportunities for emerging talent.</p></div></div>
+          <h3 className="subheading">Our Values</h3>
+          <div className="values">{["Innovation", "Passion", "Excellence", "Vision"].map((value, index) => <article key={value}><b>{["↗", "♥", "★", "◎"][index]}</b><h4>{value}</h4><p>{["Fresh ideas and creative boundaries.", "Work driven by love for storytelling.", "High standards in every delivery.", "Content that inspires future generations."][index]}</p></article>)}</div>
+          <h3 className="subheading">Our Journey</h3>
+          <div className="journey">{[["2018", "The Beginning"], ["2020", "K-Run Podcast Launch"], ["2022", "Studio Expansion"], ["2024", "Growing Impact"]].map(([year, title]) => <article key={year}><b>{year}</b><h4>{title}</h4><p>{title === "Growing Impact" ? "Reaching audiences across the continent and beyond." : "A milestone in our creative growth journey."}</p></article>)}</div>
+        </section>
+
+        <section className="mw-section team-section" id="team">
+          <div className="section-title"><h2>Our Team</h2><p>Meet the creative minds behind MzimaWells Studios</p></div>
+          <div className="team-crew">Creative Collective</div>
+          <h3 className="subheading">Leadership Team</h3>
+          <div className="team-grid">
+            {[["Dokta Will", "Creative Director"], ["Director Brian K", "Production Director"], ["Director Abel Kibet", "Content Director"], ["Duke Of Nomcity", "Technical Director"]].map(([name, role], index) => <article key={name}><div className={`team-photo team-photo-${index}`} /><h4>{name}</h4><strong>{role}</strong></article>)}
+          </div>
+          <div className="join-team"><h3>Join Our Team</h3><p>We are always looking for filmmakers, editors, content creators, and creative professionals who want to make an impact.</p><button>View Open Positions</button></div>
         </section>
       </main>
 
-      <footer>
-        <div className="footer-brand">
-          <Image src="/mzima-wells-logo.png" alt="" width={64} height={64} />
-          <div><strong>Mzima Wells</strong><span>Changing the Narrative.</span></div>
-        </div>
-        <div className="footer-links">
-          <div><strong>Explore</strong><a href="/about">About Us</a><a href="/programmes">What We Do</a><a href="/crew">Our Crew</a></div>
-          <div><strong>Participate</strong><a href="/events">Events</a><a href="/jishindie">Jishindie</a><a href="/shop">Shop</a></div>
-          <div><strong>Connect</strong><a href="/contact">Contact</a><a href="/gallery">Gallery</a><a href="/stories">Stories</a></div>
-        </div>
-        <p className="copyright">© 2026 Mzima Wells Studios</p>
+      <footer className="mw-footer">
+        <div><h2>MzimaWells Studios</h2><p>Creating compelling content that inspires, entertains, and connects communities.</p></div>
+        <div><h3>Quick Links</h3>{nav.slice(0, 5).map(([label, href]) => <a key={href} href={href}>{label}</a>)}</div>
+        <div><h3>Follow MW Studios</h3><div className="socials"><a href="#">f</a><a href="#">in</a><a href="#">▶</a><a href="#">◎</a><a href="#">x</a></div><p>Email: info@mzimawellsstudios.com</p><p>Phone: +254 700 000 000</p></div>
+        <p className="copyright">© 2026 MzimaWells Studios. All rights reserved.</p>
       </footer>
     </div>
   );
