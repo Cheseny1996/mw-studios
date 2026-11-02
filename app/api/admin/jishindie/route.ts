@@ -5,7 +5,11 @@ import { ChallengeRegistrationModel } from "@/lib/models";
 
 export async function GET(request: NextRequest) {
   const session = await getFreshStaffSession();
-  if (!session || !["super_admin", "admin", "election_manager"].includes(String(session.role))) {
+  const allowed = session && (
+    ["super_admin", "admin", "election_manager"].includes(session.role)
+    || (session.role === "department_admin" && session.department === "elections")
+  );
+  if (!allowed) {
     return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   }
   await connectToDatabase();
@@ -16,11 +20,15 @@ export async function GET(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   const session = await getFreshStaffSession();
-  if (!session || !["super_admin", "admin", "election_manager"].includes(String(session.role))) {
+  const allowed = session && (
+    ["super_admin", "admin", "election_manager"].includes(session.role)
+    || (session.role === "department_admin" && session.department === "elections")
+  );
+  if (!allowed) {
     return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   }
   const body = await request.json().catch(() => null);
-  if (!body?.entryId || !["pending", "approved", "rejected"].includes(body.status)) {
+  if (!body?.entryId || !["registered", "review", "approved", "rejected"].includes(body.status)) {
     return NextResponse.json({ error: "Valid entry and status are required." }, { status: 400 });
   }
   await connectToDatabase();

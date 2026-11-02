@@ -2,17 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { getFreshStaffSession } from "@/lib/staff-auth";
 import { connectToDatabase } from "@/lib/db";
 import { StudioEventModel } from "@/lib/models";
+import { canManageStaffSection } from "@/lib/staff-roles";
 
 export async function GET() {
   const session = await getFreshStaffSession();
-  if (!session || !["super_admin", "admin", "event_manager", "communications"].includes(String(session.role))) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+  if (!session || !canManageStaffSection(session.role, session.department, "events")) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   await connectToDatabase();
   return NextResponse.json({ events: await StudioEventModel.find().sort({ date: 1 }).lean() });
 }
 
 export async function POST(request: NextRequest) {
   const session = await getFreshStaffSession();
-  if (!session || !["super_admin", "admin", "event_manager", "communications"].includes(String(session.role))) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+  if (!session || !canManageStaffSection(session.role, session.department, "events")) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   const body = await request.json().catch(() => null);
   if (!body?.title || !body?.date) return NextResponse.json({ error: "Title and date are required." }, { status: 400 });
   await connectToDatabase();
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   const session = await getFreshStaffSession();
-  if (!session || !["super_admin", "admin", "event_manager", "communications"].includes(String(session.role))) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+  if (!session || !canManageStaffSection(session.role, session.department, "events")) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   const body = await request.json().catch(() => null);
   if (!body?.id || !body?.title || !body?.date) return NextResponse.json({ error: "Event ID, title and date are required." }, { status: 400 });
   await connectToDatabase();
@@ -34,7 +35,7 @@ export async function PATCH(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   const session = await getFreshStaffSession();
-  if (!session || !["super_admin", "admin", "event_manager", "communications"].includes(String(session.role))) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+  if (!session || !canManageStaffSection(session.role, session.department, "events")) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   const id = request.nextUrl.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "Event ID is required." }, { status: 400 });
   await connectToDatabase();

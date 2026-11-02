@@ -67,7 +67,7 @@ export default function Home() {
   const [challengeSchedule, setChallengeSchedule] = useState<{status:string;registrationEndsAt:string;votingEndsAt:string;nextAnnouncement:string}|null>(null);
   const [challengeNow, setChallengeNow] = useState(0);
   useEffect(() => {
-    setChallengeNow(Date.now());
+    window.setTimeout(() => setChallengeNow(Date.now()), 0);
     const refreshChallenge=()=>{
       fetch("/api/jishindie/challenge",{cache:"no-store"})
         .then((response) => response.ok ? response.json() : null)
@@ -164,6 +164,7 @@ export default function Home() {
   }
   const nav = [
     ["Blog", "/blog"],
+    ["Shop", "/shop"],
     ["Events", "/events"],
     ["Jishindie", "/jishindie"],
     ["Careers", "/careers"],
@@ -234,6 +235,20 @@ export default function Home() {
             <div className="hero-actions">
               <a href="#what-we-do">Explore Our Work <b aria-hidden="true">→</b></a>
             </div>
+          </div>
+        </section>
+
+        <section className="mw-section studio-feature-section" aria-label="MzimaWells studio and Plat4m Talk">
+          <div className="section-title"><span>THE STUDIO</span><h2>Stories, conversations, and culture.</h2><p>Meet the MzimaWells creative studio and tune in to Plat4m Talk Live.</p></div>
+          <div className="studio-feature-grid">
+            <a href="/about" className="studio-feature-card">
+              <Image src="/media/studio/mzima-plat4m-branding.jpg" alt="MzimaWells Studios and ThePlat4m logos" width={768} height={960} />
+              <div><span>MW STUDIOS</span><h3>Stories made to move people.</h3><b>Discover the studio →</b></div>
+            </a>
+            <a href="/podcast" className="studio-feature-card">
+              <Image src="/media/studio/plat4m-talk-live.jpg" alt="The Plat4m Talk Live studio poster" width={1229} height={768} />
+              <div><span>THE PLAT4M · TALK LIVE</span><h3>We inform, educate, and entertain.</h3><b>Explore the conversations →</b></div>
+            </a>
           </div>
         </section>
 

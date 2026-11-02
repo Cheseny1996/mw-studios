@@ -156,3 +156,77 @@ ChallengeVoteSchema.index({ challengeSlug: 1, voterId: 1 }, { unique: true });
 ChallengeVoteSchema.index({ challengeSlug: 1, contestantId: 1 });
 
 export const ChallengeVoteModel = models.ChallengeVote ?? mongoose.model("ChallengeVote", ChallengeVoteSchema);
+
+const ChallengeSettingsSchema = new Schema({
+  challengeSlug: { type: String, required: true, unique: true, trim: true, lowercase: true },
+  title: { type: String, required: true, trim: true },
+  challengeType: { type: String, enum: ["tshirt", "seasonal", "game_night", "creative", "custom"], default: "creative" },
+  registrationStartsAt: { type: Date, required: true },
+  registrationEndsAt: { type: Date, required: true },
+  votingStartsAt: { type: Date, required: true },
+  votingEndsAt: { type: Date, required: true },
+  nextAnnouncement: { type: String, default: "" },
+  prizeSummary: { type: String, default: "" },
+}, { timestamps: true });
+
+export const ChallengeSettingsModel = models.ChallengeSettings ?? mongoose.model("ChallengeSettings", ChallengeSettingsSchema);
+
+const CommunityPollSchema = new Schema({
+  title: { type: String, required: true, trim: true, maxlength: 160 },
+  description: { type: String, default: "", trim: true, maxlength: 1000 },
+  options: { type: [String], required: true, validate: (values: string[]) => values.length >= 2 && values.length <= 8 },
+  startsAt: { type: Date, required: true },
+  endsAt: { type: Date, required: true },
+  status: { type: String, enum: ["draft", "active", "closed"], default: "draft", index: true },
+}, { timestamps: true });
+
+export const CommunityPollModel = models.CommunityPoll ?? mongoose.model("CommunityPoll", CommunityPollSchema);
+
+const CommunityPollVoteSchema = new Schema({
+  pollId: { type: Schema.Types.ObjectId, ref: "CommunityPoll", required: true },
+  voterId: { type: String, required: true },
+  optionIndex: { type: Number, required: true },
+}, { timestamps: true });
+CommunityPollVoteSchema.index({ pollId: 1, voterId: 1 }, { unique: true });
+CommunityPollVoteSchema.index({ pollId: 1, optionIndex: 1 });
+
+export const CommunityPollVoteModel = models.CommunityPollVote ?? mongoose.model("CommunityPollVote", CommunityPollVoteSchema);
+
+const ShopCategorySchema = new Schema({
+  name: { type: String, required: true, trim: true, maxlength: 100 },
+  slug: { type: String, required: true, trim: true, lowercase: true, unique: true },
+  description: { type: String, default: "", trim: true, maxlength: 500 },
+  active: { type: Boolean, default: true },
+}, { timestamps: true });
+
+export const ShopCategoryModel = models.ShopCategory ?? mongoose.model("ShopCategory", ShopCategorySchema);
+
+const ShopProductSchema = new Schema({
+  name: { type: String, required: true, trim: true, maxlength: 160 },
+  slug: { type: String, required: true, trim: true, lowercase: true, unique: true },
+  description: { type: String, default: "", trim: true, maxlength: 2000 },
+  imageUrl: { type: String, default: "", trim: true, maxlength: 2048 },
+  price: { type: Number, required: true, min: 0 },
+  categorySlug: { type: String, required: true, index: true },
+  status: { type: String, enum: ["draft", "published"], default: "draft", index: true },
+}, { timestamps: true });
+
+export const ShopProductModel = models.ShopProduct ?? mongoose.model("ShopProduct", ShopProductSchema);
+
+const ShopOrderSchema = new Schema({
+  orderNumber: { type: String, required: true, unique: true },
+  customerName: { type: String, required: true, trim: true, maxlength: 120 },
+  email: { type: String, required: true, lowercase: true, trim: true },
+  phone: { type: String, required: true, trim: true, maxlength: 32 },
+  deliveryAddress: { type: String, default: "", trim: true, maxlength: 1000 },
+  items: [{
+    productId: { type: Schema.Types.ObjectId, ref: "ShopProduct", required: true },
+    name: { type: String, required: true },
+    price: { type: Number, required: true },
+    quantity: { type: Number, required: true, min: 1 },
+  }],
+  total: { type: Number, required: true, min: 0 },
+  status: { type: String, enum: ["pending", "confirmed", "fulfilled", "cancelled"], default: "pending", index: true },
+}, { timestamps: true });
+
+export const ShopOrderModel = models.ShopOrder ?? mongoose.model("ShopOrder", ShopOrderSchema);

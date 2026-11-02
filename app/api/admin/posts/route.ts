@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getFreshStaffSession } from "@/lib/staff-auth";
 import { connectToDatabase } from "@/lib/db";
 import { ContentModel } from "@/lib/models";
+import { canManageStaffSection } from "@/lib/staff-roles";
 
 const postSchema = z.object({
   id: z.string().optional(),
@@ -20,10 +21,6 @@ const postSchema = z.object({
   })).max(100).optional(),
   status: z.enum(["draft", "published", "archived"]).default("draft"),
 });
-
-function canManagePosts(role: string) {
-  return ["super_admin", "admin", "content_editor", "communications"].includes(role);
-}
 
 function articleFields(body: z.infer<typeof postSchema>) {
   const tags = [...new Map((body.tags || [])
@@ -54,7 +51,7 @@ function articleFields(body: z.infer<typeof postSchema>) {
 
 export async function GET() {
   const session = await getFreshStaffSession();
-  if (!session || !canManagePosts(String(session.role))) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+  if (!session || !canManageStaffSection(session.role, session.department, "posts")) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   await connectToDatabase();
   const posts = await ContentModel.find({ type: "post" }).sort({ updatedAt: -1 }).lean();
   return NextResponse.json({ posts });
@@ -62,7 +59,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   const session = await getFreshStaffSession();
-  if (!session || !canManagePosts(String(session.role))) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+  if (!session || !canManageStaffSection(session.role, session.department, "posts")) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   const parsed = postSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Enter a valid title, status, and article content." }, { status: 400 });
   await connectToDatabase();
@@ -77,7 +74,7 @@ export async function POST(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   const session = await getFreshStaffSession();
-  if (!session || !canManagePosts(String(session.role))) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+  if (!session || !canManageStaffSection(session.role, session.department, "posts")) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   const parsed = postSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success || !parsed.data.id) return NextResponse.json({ error: "Post ID, title, status, and article content are required." }, { status: 400 });
   await connectToDatabase();
@@ -95,7 +92,7 @@ export async function PATCH(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   const session = await getFreshStaffSession();
-  if (!session || !canManagePosts(String(session.role))) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+  if (!session || !canManageStaffSection(session.role, session.department, "posts")) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   const id = request.nextUrl.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "Post ID is required." }, { status: 400 });
   await connectToDatabase();

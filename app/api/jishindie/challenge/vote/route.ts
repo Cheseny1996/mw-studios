@@ -3,27 +3,27 @@ import crypto from "crypto";
 import { z } from "zod";
 import { connectToDatabase } from "@/lib/db";
 import { ChallengeRegistrationModel, ChallengeVoteModel } from "@/lib/models";
-import { getJishindieSchedule } from "../route";
+import { getChallengeSchedule } from "@/lib/jishindie-schedule";
 
 const schema = z.object({
   contestantId: z.string().min(1),
   voterId: z.string().min(1).max(128).optional(),
-  challengeSlug: z.enum(["weekly-jishindie", "kapsokwony-annual-run"]).optional(),
+  challengeSlug: z.string().trim().min(2).max(100).regex(/^[a-z0-9-]+$/).optional(),
 });
 
 export async function POST(request: NextRequest) {
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Choose a contestant before voting." }, { status: 400 });
-  const schedule = getJishindieSchedule();
+  await connectToDatabase();
+  const challengeSlug = parsed.data.challengeSlug || "weekly-jishindie";
+  const schedule = await getChallengeSchedule(challengeSlug);
   if (schedule.status !== "voting") {
     return NextResponse.json({
-      error: schedule.status === "registration"
-        ? "Voting opens Sunday at 8:00 AM EAT after registration closes."
+      error: schedule.status === "registration" || schedule.status === "scheduled"
+        ? "Voting is not open for this challenge yet."
         : "Voting has ended for this challenge.",
     }, { status: 409 });
   }
-  await connectToDatabase();
-  const challengeSlug = parsed.data.challengeSlug || "weekly-jishindie";
   let voterId = parsed.data.voterId || request.headers.get("x-mzima-voter-id");
   if (!voterId) {
     voterId = crypto.randomUUID();

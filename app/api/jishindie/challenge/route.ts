@@ -3,47 +3,15 @@ import { z } from "zod";
 import crypto from "crypto";
 import { connectToDatabase } from "@/lib/db";
 import { ChallengeRegistrationModel, ChallengeVoteModel } from "@/lib/models";
+import { getChallengeSchedule, getJishindieSchedule } from "@/lib/jishindie-schedule";
 
-export function getJishindieSchedule(now = new Date()) {
-  const shifted = new Date(now.getTime() + 3 * 60 * 60 * 1000);
-  const year = shifted.getUTCFullYear();
-  const month = shifted.getUTCMonth();
-  const date = shifted.getUTCDate();
-  const day = shifted.getUTCDay();
-  const hour = shifted.getUTCHours();
-  const minute = shifted.getUTCMinutes();
-
-  const elapsedMinutes = hour * 60 + minute;
-  let daysUntilSunday = (7 - day) % 7;
-  if (day === 0 && elapsedMinutes < 21 * 60) daysUntilSunday = 0;
-
-  const sunday = Date.UTC(year, month, date + daysUntilSunday);
-  const registrationEndsAt = new Date(sunday + 8 * 60 * 60 * 1000 - 3 * 60 * 60 * 1000);
-  const votingEndsAt = new Date(sunday + 21 * 60 * 60 * 1000 - 3 * 60 * 60 * 1000);
-
-  let status: "registration" | "voting" | "closed" = "registration";
-  if (now.getTime() >= registrationEndsAt.getTime() && now.getTime() < votingEndsAt.getTime()) status = "voting";
-  if (now.getTime() >= votingEndsAt.getTime()) status = "closed";
-
-  return {
-    timezone: "Africa/Nairobi (EAT)",
-    status,
-    registrationEndsAt: registrationEndsAt.toISOString(),
-    votingStartsAt: registrationEndsAt.toISOString(),
-    votingEndsAt: votingEndsAt.toISOString(),
-    nextAnnouncement: status === "registration"
-      ? "Registration closes Sunday at 8:00 AM EAT. Voting opens immediately."
-      : status === "voting"
-        ? "Voting is live until Sunday at 9:00 PM EAT."
-        : "The challenge is complete. The next Sunday challenge opens for registration.",
-  };
-}
+export { getJishindieSchedule };
 
 export async function GET(request: NextRequest) {
   await connection();
   await connectToDatabase();
   const slug = request.nextUrl.searchParams.get("challenge") || "weekly-jishindie";
-  const [registered, allEntries, approved, totals] = await Promise.all([
+  const [registered, allEntries, approved, totals, schedule, voteTrend] = await Promise.all([
     ChallengeRegistrationModel.countDocuments({ challengeSlug: slug }),
     ChallengeRegistrationModel.find({ challengeSlug: slug })
       .select("fullName stageName category entryTitle entryLink photograph status")
@@ -56,17 +24,28 @@ export async function GET(request: NextRequest) {
       { $match: { challengeSlug: slug } },
       { $group: { _id: "$contestantId", votes: { $sum: 1 } } },
     ]),
+    getChallengeSchedule(slug),
+    ChallengeVoteModel.aggregate([
+      { $match: { challengeSlug: slug, createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } } },
+      { $group: { _id: { $dateTrunc: { date: "$createdAt", unit: "hour" } }, votes: { $sum: 1 } } },
+      { $sort: { _id: 1 } },
+    ]),
   ]);
   const voteTotals = new Map(totals.map((row: { _id: unknown; votes: number }) => [String(row._id), row.votes]));
   return NextResponse.json({
-    schedule: getJishindieSchedule(),
+    schedule,
     challenge: {
       slug,
-      title: "Weekly Jishindie Challenge",
-      status: "registration",
+      title: schedule.title,
+      type: schedule.challengeType,
+      status: schedule.status,
     },
     registered,
     totalVotes: totals.reduce((sum: number, row: { votes: number }) => sum + row.votes, 0),
+    voteTrend: voteTrend.map((row: { _id: Date; votes: number }) => ({
+      at: new Date(row._id).toISOString(),
+      votes: row.votes,
+    })),
     entries: allEntries.map((entry) => ({
       _id: String(entry._id),
       fullName: entry.fullName,
@@ -83,7 +62,7 @@ export async function GET(request: NextRequest) {
 }
 
 const registrationSchema = z.object({
-  challengeSlug: z.string().trim().min(2).max(100).optional(),
+  challengeSlug: z.string().trim().min(2).max(100).regex(/^[a-z0-9-]+$/).optional(),
   fullName: z.string().trim().min(2).max(100),
   stageName: z.string().trim().max(100).optional(),
   email: z.string().trim().email().max(254),
@@ -102,19 +81,19 @@ export async function POST(request: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Invalid registration details." }, { status: 400 });
   }
-  const schedule = getJishindieSchedule();
+  await connectToDatabase();
+  const slug = parsed.data.challengeSlug || "weekly-jishindie";
+  const schedule = await getChallengeSchedule(slug);
   if (schedule.status !== "registration") {
     return NextResponse.json({
       error: schedule.status === "voting"
         ? "Registration has closed. Voting is now live."
-        : "Registration for this challenge has ended.",
+        : schedule.status === "scheduled"
+          ? "Registration has not opened for this challenge yet."
+          : "Registration for this challenge has ended.",
     }, { status: 409 });
   }
-  await connectToDatabase();
   try {
-    const slug = parsed.data.challengeSlug === "kapsokwony-annual-run"
-      ? "kapsokwony-annual-run"
-      : "weekly-jishindie";
     const entry = await ChallengeRegistrationModel.findOneAndUpdate(
       { challengeSlug: slug, email: parsed.data.email.toLowerCase() },
       {
@@ -135,7 +114,7 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
   } catch (error) {
     if ((error as { code?: number }).code === 11000) {
-      return NextResponse.json({ success: true, message: "This email is already registered for the weekly challenge." });
+      return NextResponse.json({ success: true, message: "This email is already registered for this challenge." });
     }
     throw error;
   }
