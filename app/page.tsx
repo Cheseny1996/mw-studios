@@ -294,11 +294,15 @@ export default function Home() {
             <button onClick={openChallengeRegistration}>Register to compete <b>→</b></button>
           </div>
           <div className="stats">
-            {[String(registeredCount), "3", "3", "KSH Prizes"].map((value, index) => <div key={index}><strong>{value}</strong><span>{["Registered creators", "Prize tiers", "Ways to vote", "Rewards"][index]}</span></div>)}
+            {[String(registeredCount), "KSH 100", "3", "Sunday"].map((value, index) => <div key={index}><strong>{value}</strong><span>{["Registered creators", "Registration fee", "Ways to vote", "Challenge day"][index]}</span></div>)}
           </div>
-          <h3 className="subheading prize-heading">Challenge prizes</h3>
-          <div className="prizes">
-            {[["01", "Grand Prize", "MzimaWells feature outfit + branded merchandise"], ["02", "Runner Up", "Official MzimaWells hoodie + studio access"], ["03", "Fan Favourite", "MzimaWells mug + branded T-shirt"]].map(([number, title, copy]) => <article key={title}><span>{number}</span><div className="prize-art">MW</div><h4>{title}</h4><p>{copy}</p></article>)}
+          <h3 className="subheading">Jishindie Winners</h3>
+          <div className="team-grid jishindie-winners-grid">
+            {[
+              ["Academician Kibet OGW", "Jishindie Winner", "/crew/academician-kibet.jpeg"],
+              ["Ann Cheroo", "Jishindie Winner", "/crew/ann-cheroo.jpeg"],
+              ["Caleb Junior", "Jishindie Winner", "/crew/caleb-junior.jpeg"],
+            ].map(([name, role, photo]) => <article key={name}><img className="team-photo-real" src={photo} alt={name} /><h4>{name}</h4><strong>{role}</strong></article>)}
           </div>
           <h3 className="subheading">Approved contestants</h3>
           {contestants.length ? (
@@ -320,7 +324,13 @@ export default function Home() {
           ) : <div className="empty-contestants"><b>Contestants are being reviewed.</b><p>Approved entries will appear here before voting opens.</p></div>}
           <h3 className="subheading">How to take part</h3>
           <div className="steps">
-            {[["Register", "Sign up during the open period."], ["Create", "Develop content following the theme and guidelines."], ["Submit", "Upload your submission before the deadline."], ["Win", "Top entries receive prizes and industry opportunities."]].map(([title, copy], index) => <article key={title}><b>{index + 1}</b><div><h4>{title}</h4><p>{copy}</p></div></article>)}
+            {[
+              ["Register", "Register on the platform and pay the registration fee of Ksh 100."],
+              ["Share", "After registration, share your link with fans, platform members, and supporters."],
+              ["Voting closes", "Registration starts on any day and closes Sunday at 8:00 AM. At 8:00 AM, the challenge begins."],
+              ["Challenge ends", "The challenge runs until 9:00 PM on Sunday evening."],
+              ["Winner announced", "The winner is announced, contacted, and receives the challenge gift."],
+            ].map(([title, copy], index) => <article key={title}><b>{index + 1}</b><div><h4>{title}</h4><p>{copy}</p></div></article>)}
           </div>
           <button className="register-button" onClick={openChallengeRegistration}>Register for the challenge</button>
           {challengeNotice && <p className="challenge-notice" role="status">{challengeNotice}</p>}
@@ -334,7 +344,7 @@ export default function Home() {
               <button className="modal-close" aria-label="Close registration" onClick={() => setRegistrationOpen(false)}>×</button>
               <span className="live-pill">OPEN REGISTRATION</span>
               <h2 id="challenge-registration-title">Join the Jishindie Challenge</h2>
-              <p>Register your talent once, then return for voting when your entry is approved.</p>
+              <p>Registration costs Ksh 100. Register your talent, share your entry link, and return for voting when registration closes.</p>
               <form onSubmit={registerForChallenge}>
                 <div className="form-grid">
                   <label>Full name<input name="fullName" required minLength={2} maxLength={100} /></label>
@@ -372,14 +382,6 @@ export default function Home() {
               ["Director Brian K", "Production Director", "/crew/director-brian-k.jpeg"],
               ["Director Abel Kibet", "Content Director", "/crew/director-abel-kibet.jpeg"],
               ["Duke Of Nomcity", "Technical Director", "/crew/director-duke-of-nomcity.jpeg"],
-            ].map(([name, role, photo]) => <article key={name}><img className="team-photo-real" src={photo} alt={name} /><h4>{name}</h4><strong>{role}</strong></article>)}
-          </div>
-          <h3 className="subheading">Jishindie Winners</h3>
-          <div className="team-grid">
-            {[
-              ["Academician Kibet OGW", "Jishindie Winner", "/crew/academician-kibet.jpeg"],
-              ["Ann Cheroo", "Jishindie Winner", "/crew/ann-cheroo.jpeg"],
-              ["Caleb Junior", "Jishindie Winner", "/crew/caleb-junior.jpeg"],
             ].map(([name, role, photo]) => <article key={name}><img className="team-photo-real" src={photo} alt={name} /><h4>{name}</h4><strong>{role}</strong></article>)}
           </div>
           <div className="join-team"><h3>Join Our Team</h3><p>We are always looking for filmmakers, editors, content creators, and creative professionals who want to make an impact.</p><a className="join-team-link" href="/careers">View careers and opportunities</a></div>

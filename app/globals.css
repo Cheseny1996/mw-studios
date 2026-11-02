@@ -661,6 +661,38 @@ body,
   }
 }
 
+.jishindie-section-page .steps,
+.jishindie-hero + .route-content .steps {
+  grid-template-columns:repeat(5,1fr);
+}
+.jishindie-winners-grid article {
+  border-radius:10px;
+  overflow:hidden;
+  background:#fff;
+}
+.jishindie-winners-grid .team-photo-real {
+  width:100%;
+  height:340px;
+  object-fit:cover;
+  object-position:center top;
+}
+
+@media (max-width:900px) {
+  .jishindie-section-page .steps,
+  .jishindie-hero + .route-content .steps {
+    grid-template-columns:1fr 1fr;
+  }
+}
+@media (max-width:560px) {
+  .jishindie-section-page .steps,
+  .jishindie-hero + .route-content .steps {
+    grid-template-columns:1fr;
+  }
+  .jishindie-winners-grid .team-photo-real {
+    height:360px;
+  }
+}
+
 /* Remove red/orange-red text and accent tones across the entire site. */
 .mw-brand h1,
 .mw-brand h1 span,
