@@ -58,11 +58,7 @@ const events = [
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [registrationOpen, setRegistrationOpen] = useState(false);
-  const [accountOpen, setAccountOpen] = useState(false);
-  const [accountMode, setAccountMode] = useState<"signin" | "signup">("signin");
-  const [authNotice, setAuthNotice] = useState("");
   const [sessionUser, setSessionUser] = useState<{ name: string; email: string; role?: string } | null>(null);
-  const [authAfter, setAuthAfter] = useState<"challenge" | null>(null);
   const [challengeNotice, setChallengeNotice] = useState("");
   const [selectedNews, setSelectedNews] = useState<string | null>(null);
   const [registeredCount, setRegisteredCount] = useState(0);
@@ -127,40 +123,9 @@ export default function Home() {
     form.reset();
   }
 
-  async function submitAccount(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const payload = Object.fromEntries(new FormData(form));
-    setAuthNotice(accountMode === "signin" ? "Signing in..." : "Creating your account...");
-    const response = await fetch(`/api/auth/${accountMode === "signin" ? "login" : "register"}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      setAuthNotice(data.error || "Account action could not be completed.");
-      return;
-    }
-    setSessionUser(data.user);
-    setAccountOpen(false);
-    setAuthNotice("");
-    if (authAfter === "challenge") {
-      setRegistrationOpen(true);
-      setChallengeNotice("Signed in. Complete your challenge registration below.");
-    }
-    setAuthAfter(null);
-  }
-
   function openChallengeRegistration() {
-    if (sessionUser) {
-      setRegistrationOpen(true);
-      return;
-    }
-    setAuthAfter("challenge");
-    setAccountMode("signup");
-    setAuthNotice("");
-    setAccountOpen(true);
+    setRegistrationOpen(true);
+    setChallengeNotice("Complete your challenge registration below.");
   }
 
   async function voteForContestant(contestantId: string) {
@@ -209,46 +174,10 @@ export default function Home() {
           {nav.map(([label, href]) => <a key={href} href={href} onClick={() => setMenuOpen(false)}>{label}</a>)}
           {sessionUser?.role && ["super_admin", "admin", "content_editor", "event_manager", "communications", "hr_manager"].includes(sessionUser.role) && <a href="/admin">Admin</a>}
         </nav>
-        <button className="mw-account-button" onClick={() => {
-          setAccountMode("signin");
-          setAuthAfter(null);
-          setAccountOpen(true);
-        }}>{sessionUser ? sessionUser.name.split(" ")[0] : "Sign in"}</button>
         <button className="mw-menu" aria-label="Toggle navigation" aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}>
           <span /><span /><span />
         </button>
       </header>
-
-      {accountOpen && (
-        <div className="challenge-modal-backdrop" role="presentation" onMouseDown={(event) => {
-          if (event.currentTarget === event.target) setAccountOpen(false);
-        }}>
-          <div className="challenge-modal account-modal" role="dialog" aria-modal="true" aria-labelledby="account-title">
-            <button className="modal-close" aria-label="Close account panel" onClick={() => setAccountOpen(false)}>×</button>
-            <span className="live-pill">MW STUDIOS ACCOUNT</span>
-            <div className="account-tabs">
-              <button className={accountMode === "signin" ? "active" : ""} onClick={() => { setAccountMode("signin"); setAuthNotice(""); }}>Sign in</button>
-              <button className={accountMode === "signup" ? "active" : ""} onClick={() => { setAccountMode("signup"); setAuthNotice(""); }}>Create account</button>
-            </div>
-            <h2 id="account-title">{accountMode === "signin" ? "Welcome back" : "Create your account"}</h2>
-            <p>{accountMode === "signin" ? "Sign in with your email and password." : "Register with your name, email, phone and password."}</p>
-            <form onSubmit={submitAccount}>
-              <div className="form-grid">
-                {accountMode === "signup" && (
-                  <>
-                    <label className="full-field">Full name<input name="fullName" required minLength={2} maxLength={100} /></label>
-                    <label>Phone number<input name="phone" type="tel" required minLength={7} maxLength={32} /></label>
-                  </>
-                )}
-                <label className={accountMode === "signup" ? "full-field" : "full-field"}>Email address<input name="email" type="email" required maxLength={254} /></label>
-                <label className="full-field">Password<input name="password" type="password" required minLength={12} maxLength={128} /></label>
-              </div>
-              <button className="submit-registration" type="submit">{accountMode === "signin" ? "Sign in" : "Create account"}</button>
-            </form>
-            {authNotice && <p className="challenge-notice" role="status">{authNotice}</p>}
-          </div>
-        </div>
-      )}
 
       {selectedNews && (() => {
         const story = news.find(([title]) => title === selectedNews);
