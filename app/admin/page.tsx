@@ -15,12 +15,12 @@ export default function AdminPage() {
 
   async function loadTab(value = tab) {
     setNotice("");
-    const endpoint = value === "posts" ? "/api/admin/posts" : value === "events" ? "/api/admin/events" : value === "opportunities" ? "/api/admin/opportunities" : value === "users" ? "/api/admin/users" : "";
+    const endpoint = value === "posts" ? "/api/admin/posts" : value === "events" ? "/api/admin/events" : value === "opportunities" ? "/api/admin/opportunities" : value === "users" ? "/api/admin/users" : value === "jishindie" ? "/api/admin/jishindie" : "";
     if (!endpoint) return;
     const response = await fetch(endpoint);
     const data = await response.json().catch(() => ({}));
     if (value === "users") { setUsers(data.users || []); setRoles(data.roles || []); }
-    else setItems(data.posts || data.events || data.opportunities || []);
+    else setItems(data.posts || data.events || data.opportunities || data.entries || []);
   }
 
   useEffect(() => {
@@ -73,16 +73,24 @@ export default function AdminPage() {
     loadTab("users");
   }
 
+  async function updateJishindieEntry(entryId: string, status: string) {
+    const response = await fetch("/api/admin/jishindie", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ entryId, status }) });
+    const data = await response.json().catch(() => ({}));
+    setNotice(response.ok ? `Jishindie entry ${status}.` : data.error || "Entry update failed.");
+    loadTab("jishindie");
+  }
+
   if (!staff) return <main className="admin-denied"><span>MW STAFF CONSOLE</span><h1>Administrator access</h1><p>{notice || "Checking your permissions..."}</p><Link href="/">← Return to website</Link></main>;
 
   return (
     <main className="admin-shell">
-      <aside className="admin-sidebar"><Link className="admin-brand" href="/">MW Studios</Link><nav>{["overview", "posts", "events", "opportunities", "users"].map((item) => <button key={item} className={tab === item ? "active" : ""} onClick={() => setTab(item)}>{item === "users" ? "Staff & roles" : item[0].toUpperCase() + item.slice(1)}</button>)}</nav><Link href="/">View website</Link></aside>
+      <aside className="admin-sidebar"><Link className="admin-brand" href="/">MW Studios</Link><nav>{["overview", "posts", "events", "opportunities", "jishindie", "users"].map((item) => <button key={item} className={tab === item ? "active" : ""} onClick={() => setTab(item)}>{item === "users" ? "Staff & roles" : item === "jishindie" ? "Jishindie entries" : item[0].toUpperCase() + item.slice(1)}</button>)}</nav><Link href="/">View website</Link></aside>
       <section className="admin-main"><header><div><span>MzimaWells workspace</span><h1>{staff.name}</h1></div><b>{staff.role.replace("_", " ")}</b></header>{notice && <p className="admin-notice" role="status">{notice}</p>}
         {tab === "overview" && <div className="admin-overview"><article><span>CONTENT</span><h2>Publish stories</h2><p>Create, edit, review and publish journal posts.</p><button onClick={() => setTab("posts")}>Manage posts →</button></article><article><span>EVENTS</span><h2>Create experiences</h2><p>Publish events for public registration and attendance.</p><button onClick={() => setTab("events")}>Manage events →</button></article><article><span>PEOPLE</span><h2>Build the team</h2><p>Publish careers or assign staff roles by department.</p><button onClick={() => setTab("opportunities")}>Manage opportunities →</button></article></div>}
         {tab === "posts" && <div className="admin-panel"><h2>Blog post</h2><form className="admin-form" onSubmit={savePost}><input name="title" placeholder="Story title" required /><input name="slug" placeholder="Permalink slug (optional)" /><input name="excerpt" placeholder="Short summary" /><textarea name="body" placeholder="Full story body" rows={9} /><select name="status"><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select><button>Save / publish post</button></form></div>}
         {tab === "events" && <div className="admin-panel"><h2>Event</h2><form className="admin-form" onSubmit={saveEvent}><input name="title" placeholder="Event title" required /><input name="slug" placeholder="Permalink slug (optional)" /><input name="date" type="datetime-local" required /><input name="time" placeholder="Time, e.g. 7:00 PM" /><input name="location" placeholder="Location" /><input name="capacity" type="number" min="0" placeholder="Capacity" /><textarea name="description" placeholder="Event description" rows={7} /><select name="status"><option value="draft">Draft</option><option value="published">Published</option><option value="cancelled">Cancelled</option></select><button>Save / publish event</button></form></div>}
         {tab === "opportunities" && <div className="admin-panel"><h2>Career opportunity</h2><form className="admin-form" onSubmit={saveOpportunity}><input name="title" placeholder="Job title" required /><input name="slug" placeholder="Permalink slug (optional)" /><select name="department"><option value="hr">HR</option><option value="creative">Creative</option><option value="production">Production</option><option value="communications">Communications</option><option value="events">Events</option><option value="technology">Technology</option><option value="other">Other</option></select><input name="location" placeholder="Location" /><input name="employmentType" placeholder="Employment type" /><input name="applicationEmail" type="email" placeholder="Application email" /><input name="applicationUrl" placeholder="Application URL (optional)" /><textarea name="summary" placeholder="Opportunity summary" rows={4} /><textarea name="description" placeholder="Role description" rows={5} /><textarea name="requirements" placeholder="Requirements" rows={5} /><select name="status"><option value="draft">Draft</option><option value="published">Published</option><option value="closed">Closed</option></select><button>Save / publish opportunity</button></form></div>}
+        {tab === "jishindie" && <div className="admin-panel"><h2>Jishindie registrations</h2><div className="staff-table">{items.map((entry) => <div key={String(entry._id)}><p><b>{String(entry.stageName || entry.fullName)}</b><span>{String(entry.category)} · {String(entry.status)} · {String(entry.email || "")}</span></p><select value={String(entry.status)} onChange={(event) => updateJishindieEntry(String(entry._id), event.target.value)}><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select></div>)}</div></div>}
         {tab === "users" && <div className="admin-panel"><h2>Staff access</h2><div className="staff-table">{users.map((user) => <div key={user._id}><p><b>{user.fullName}</b><span>{user.email}</span></p><select value={user.role} onChange={(event) => assignRole(user._id, event.target.value)}>{roles.map((role) => <option key={role} value={role}>{role.replace("_", " ")}</option>)}</select></div>)}</div></div>}
       </section>
     </main>

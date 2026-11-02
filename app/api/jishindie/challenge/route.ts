@@ -42,8 +42,12 @@ export function getJishindieSchedule(now = new Date()) {
 export async function GET(request: NextRequest) {
   await connectToDatabase();
   const slug = request.nextUrl.searchParams.get("challenge") || "weekly-jishindie";
-  const [registered, approved, totals] = await Promise.all([
+  const [registered, allEntries, approved, totals] = await Promise.all([
     ChallengeRegistrationModel.countDocuments({ challengeSlug: slug }),
+    ChallengeRegistrationModel.find({ challengeSlug: slug })
+      .select("fullName stageName category entryTitle entryLink photograph status")
+      .sort({ createdAt: -1 })
+      .lean(),
     ChallengeRegistrationModel.find({ challengeSlug: slug, status: "approved" })
       .select("fullName stageName category entryTitle entryLink photograph status voterId")
       .lean(),
@@ -61,6 +65,15 @@ export async function GET(request: NextRequest) {
       status: "registration",
     },
     registered,
+    totalVotes: totals.reduce((sum: number, row: { votes: number }) => sum + row.votes, 0),
+    entries: allEntries.map((entry) => ({
+      _id: String(entry._id),
+      fullName: entry.fullName,
+      stageName: entry.stageName || "",
+      category: entry.category,
+      status: entry.status,
+      photograph: entry.photograph || "",
+    })),
     contestants: approved.map((entry) => ({
       ...entry,
       voteCount: voteTotals.get(String(entry._id)) ?? 0,
