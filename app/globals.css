@@ -38,7 +38,7 @@ button { font-family:inherit; cursor:pointer; }
 .mw-nav a:hover { color:#ef5a22; }
 .mw-menu { display:none; border:0; background:none; width:38px; padding:8px; }
 .mw-menu span { display:block; height:2px; margin:5px 0; background:#111827; }
-.mw-hero { min-height:330px; height:330px; display:grid; place-items:center; text-align:center; color:#fff; background:#f05222; }
+.mw-hero { min-height:330px; height:330px; display:grid; place-items:center; text-align:center; color:#fff; background:#f0d050; }
 .mw-hero div { padding:0 20px; }
 .mw-hero h2 { margin:0; font-size:48px; line-height:1.1; letter-spacing:-2px; font-weight:700; }
 .mw-hero p { margin:28px 0 42px; font-size:20px; line-height:1.2; font-weight:400; }
