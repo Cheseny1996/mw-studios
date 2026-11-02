@@ -20,6 +20,7 @@
 }
 @media (max-width:600px) {
   .mw-brand img { width:38px !important; height:38px !important; }.challenge-modal { padding:26px 18px; }.form-grid,.prizes,.contestant-grid { grid-template-columns:1fr; }.challenge-banner button { width:100%; }.contestant-avatar { height:150px; }
+  .team-crew-photo { height:300px; }
 }
 
 :root { --orange:#ff671f; --orange-soft:#ff7a2e; --ink:#111827; --muted:#667085; --paper:#f8f8f7; }
@@ -87,7 +88,8 @@ button { font-family:inherit; cursor:pointer; }
 .mw-account-button { margin-left:auto; border:1px solid #e9521e; border-radius:6px; padding:9px 14px; background:#fff; color:#e9521e; font-weight:900; }
 .mw-header { gap:18px; }.mw-nav { margin-left:auto; }.mw-menu { margin-left:0; }
 .account-tabs { display:flex; gap:8px; margin-bottom:18px; }.account-tabs button { flex:1; height:42px; border:1px solid #d0d5dd; border-radius:7px; background:#fff; color:#344054; font-weight:900; }.account-tabs button.active { border-color:#e9521e; background:#fff4ef; color:#e9521e; }
-.team-crew-photo { display:block; width:100%; height:230px; object-fit:cover; object-position:center; border-radius:8px; }.team-photo-real { display:block; width:100%; height:260px; object-fit:cover; object-position:center top; border-radius:8px; }
+.team-crew-photo { display:block; width:100%; height:480px; object-fit:contain; object-position:center; border-radius:8px; background:#f3f4f6; }.team-photo-real { display:block; width:100%; height:260px; object-fit:cover; object-position:center top; border-radius:8px; }
+.story-modal { width:min(760px,100%); }.story-modal h2 { margin-bottom:18px; }.story-modal>p { color:#475467; line-height:1.75; font-size:16px; }
 .inline-action,.event-email-action,.join-team-link { display:inline-block; margin-top:8px; color:#ef5a22; font-weight:800; text-decoration:none; }
 .event-email-action { padding:12px 20px; border-radius:4px; background:#ef5a22; color:#fff; }
 .join-team-link { padding:13px 20px; border-radius:5px; background:#ef5a22; color:#fff; }

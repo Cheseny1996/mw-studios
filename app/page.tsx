@@ -12,6 +12,33 @@ const news = [
   ["Upcoming Events Calendar Released", "November 15, 2024", "Mark your calendars for our exciting lineup of events in the coming months.", false],
 ] as const;
 
+const newsStories: Record<string, string[]> = {
+  "MzimaWells Studios Launches New Podcast Series": [
+    "MzimaWells Studios has launched a new K-Run Podcast series focused on African entertainment, culture, creativity, and the people shaping meaningful conversations.",
+    "Each episode brings together artists, creators, producers, and community voices for practical discussions, personal stories, and fresh perspectives.",
+  ],
+  "Jishindie Challenge Winners Announced": [
+    "The latest Jishindie Challenge season has celebrated talented creators from across participating categories.",
+    "Community voting played a central role in recognising finalists, fan favourites, and standout entries across the season.",
+  ],
+  "Behind the Scenes: Latest Music Video Production": [
+    "The newest MzimaWells music video production showcases the planning, filming, editing, and creative collaboration that happen behind the camera.",
+    "From production design to final colour and sound, the team worked to deliver an authentic visual story.",
+  ],
+  "Community Outreach Program Success": [
+    "MzimaWells Studios recently connected with more than 500 young creatives through community engagement activities designed to inspire participation in film, media, music, podcasting, and digital storytelling.",
+    "The programme created opportunities for young people to learn, share ideas, meet creative professionals, and discover practical pathways into the creative industry.",
+  ],
+  "New Studio Equipment Upgrade": [
+    "MzimaWells Studios has expanded its production capabilities with upgraded equipment for filming, editing, audio capture, lighting, and post-production.",
+    "The investment supports higher-quality music videos, podcasts, documentaries, and live creative productions.",
+  ],
+  "Upcoming Events Calendar Released": [
+    "MzimaWells Studios has published its upcoming calendar of live recordings, workshops, community events, competitions, and creative programmes.",
+    "Visitors can use the Events section to follow upcoming activities and registration announcements.",
+  ],
+};
+
 const episodes = [
   ["The Future of African Entertainment", "December 18, 2024", "45:30", "Join us as we explore the rapidly evolving entertainment landscape across Africa."],
   ["Creative Entrepreneurship with Local Artists", "December 11, 2024", "38:15", "Inspiring conversations with artists who are building successful creative businesses."],
@@ -37,6 +64,7 @@ export default function Home() {
   const [sessionUser, setSessionUser] = useState<{ name: string; email: string } | null>(null);
   const [authAfter, setAuthAfter] = useState<"challenge" | "event" | null>(null);
   const [challengeNotice, setChallengeNotice] = useState("");
+  const [selectedNews, setSelectedNews] = useState<string | null>(null);
   const [registeredCount, setRegisteredCount] = useState(0);
   const [contestants, setContestants] = useState<Array<{ _id: string; stageName?: string; fullName: string; category: string; entryTitle: string; photograph?: string; voteCount?: number }>>([]);
   useEffect(() => {
@@ -210,6 +238,22 @@ export default function Home() {
         </div>
       )}
 
+      {selectedNews && (() => {
+        const story = news.find(([title]) => title === selectedNews);
+        return (
+          <div className="challenge-modal-backdrop" role="presentation" onMouseDown={(event) => {
+            if (event.currentTarget === event.target) setSelectedNews(null);
+          }}>
+            <article className="challenge-modal story-modal" role="dialog" aria-modal="true" aria-labelledby="story-title">
+              <button className="modal-close" aria-label="Close story" onClick={() => setSelectedNews(null)}>×</button>
+              <span className="live-pill">{story?.[1]}</span>
+              <h2 id="story-title">{selectedNews}</h2>
+              {newsStories[selectedNews]?.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+            </article>
+          </div>
+        );
+      })()}
+
       <main>
         <section className="mw-hero" id="home">
           <div>
@@ -249,7 +293,7 @@ export default function Home() {
             {news.map(([title, date, copy, trending], index) => (
               <article className="news-card" key={title}>
                 <div className={`card-art art-${index}`}><span>MzimaWells</span>{trending && <b>Trending</b>}</div>
-                <div className="card-body"><time>{date}</time><h3>{title}</h3><p>{copy}</p><a className="inline-action" href="mailto:info@mzimawellsstudios.com?subject=News%20enquiry">Ask about this story →</a></div>
+                <div className="card-body"><time>{date}</time><h3>{title}</h3><p>{copy}</p><button className="inline-action" onClick={() => setSelectedNews(title)}>Read full story →</button></div>
               </article>
             ))}
           </div>
@@ -381,12 +425,12 @@ export default function Home() {
               ["Duke Of Nomcity", "Technical Director", "/crew/director-duke-of-nomcity.jpeg"],
             ].map(([name, role, photo]) => <article key={name}><img className="team-photo-real" src={photo} alt={name} /><h4>{name}</h4><strong>{role}</strong></article>)}
           </div>
-          <h3 className="subheading">Creative Team</h3>
+          <h3 className="subheading">Jishindie Winners</h3>
           <div className="team-grid">
             {[
-              ["Academician Kibet OGW", "Creative Team", "/crew/academician-kibet.jpeg"],
-              ["Ann Cheroo", "Creative Team", "/crew/ann-cheroo.jpeg"],
-              ["Caleb Junior", "Creative Team", "/crew/caleb-junior.jpeg"],
+              ["Academician Kibet OGW", "Jishindie Winner", "/crew/academician-kibet.jpeg"],
+              ["Ann Cheroo", "Jishindie Winner", "/crew/ann-cheroo.jpeg"],
+              ["Caleb Junior", "Jishindie Winner", "/crew/caleb-junior.jpeg"],
             ].map(([name, role, photo]) => <article key={name}><img className="team-photo-real" src={photo} alt={name} /><h4>{name}</h4><strong>{role}</strong></article>)}
           </div>
           <div className="join-team"><h3>Join Our Team</h3><p>We are always looking for filmmakers, editors, content creators, and creative professionals who want to make an impact.</p><a className="join-team-link" href="mailto:info@mzimawellsstudios.com?subject=Careers%20at%20MzimaWells%20Studios">Ask About Opportunities</a></div>
