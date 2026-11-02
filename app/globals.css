@@ -1183,3 +1183,426 @@ select:focus-visible {
   .challenge-registration-form .full-field { grid-column:1; }
   .challenge-modal-card { padding:26px 18px; }
 }
+
+/* Unified professional action system */
+button,
+a.route-button,
+a.route-cta,
+.title-actions a,
+.opportunity-meta a,
+.opportunity-page .application-button,
+.join-team-page a {
+  transition:
+    transform .18s ease,
+    box-shadow .18s ease,
+    background-color .18s ease,
+    border-color .18s ease,
+    color .18s ease;
+}
+
+button:not(.mw-menu):not(.modal-close):not(.challenge-modal-close) {
+  font-family:inherit;
+}
+
+button:not(:disabled),
+a.route-button,
+a.route-cta,
+.title-actions a,
+.opportunity-meta a,
+.opportunity-page .application-button,
+.join-team-page a {
+  cursor:pointer;
+}
+
+.admin-sidebar {
+  border-right:1px solid rgba(255,255,255,.06);
+}
+
+.admin-sidebar nav button {
+  min-height:48px;
+  margin-bottom:2px;
+  border:1px solid transparent;
+  border-radius:10px;
+  padding:12px 14px;
+  font-size:14px;
+  transition:.18s ease;
+}
+
+.admin-sidebar nav button:hover {
+  border-color:rgba(197,154,59,.55);
+  background:rgba(197,154,59,.09);
+  color:#fff;
+  transform:translateX(2px);
+}
+
+.admin-sidebar nav button.active {
+  border-color:#c59a3b;
+  background:#c59a3b;
+  color:#111827;
+  box-shadow:0 10px 24px rgba(197,154,59,.22);
+}
+
+.admin-sidebar>a:last-child {
+  min-height:46px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:9px;
+  background:#c59a3b;
+  color:#111827;
+  box-shadow:0 10px 24px rgba(197,154,59,.18);
+}
+
+.admin-sidebar>a:last-child:hover {
+  transform:translateY(-2px);
+  background:#d4aa50;
+}
+
+.admin-main header>b {
+  border:1px solid #ead8a5;
+  background:#fffaf0;
+  color:#70531b;
+  font-weight:900;
+}
+
+.admin-notice {
+  border:1px solid #ead8a5;
+  border-left:4px solid #c59a3b;
+  background:#fffaf0;
+  color:#70531b;
+}
+
+.admin-overview article button,
+.admin-form button,
+.admin-item-list button,
+.staff-table select {
+  min-height:44px;
+  border-radius:9px;
+}
+
+.admin-overview article button {
+  border:1px solid #c59a3b;
+  padding:10px 14px;
+  background:#fff;
+  color:#70531b;
+  font-weight:900;
+}
+
+.admin-overview article button:hover {
+  transform:translateY(-2px);
+  background:#fffaf0;
+  box-shadow:0 9px 20px rgba(197,154,59,.16);
+}
+
+.admin-form input,
+.admin-form textarea,
+.admin-form select,
+.staff-table select,
+.admin-login-form input {
+  transition:border-color .18s ease, box-shadow .18s ease, background-color .18s ease;
+}
+
+.admin-form input:hover,
+.admin-form textarea:hover,
+.admin-form select:hover,
+.staff-table select:hover,
+.admin-login-form input:hover {
+  border-color:#b99a4e;
+}
+
+.admin-form input:focus,
+.admin-form textarea:focus,
+.admin-form select:focus,
+.staff-table select:focus,
+.admin-login-form input:focus {
+  border-color:#c59a3b;
+  box-shadow:0 0 0 4px rgba(197,154,59,.12);
+  outline:none;
+}
+
+.admin-form button {
+  border:1px solid #b68b2f;
+  background:#c59a3b;
+  color:#111827;
+  box-shadow:0 8px 18px rgba(197,154,59,.16);
+}
+
+.admin-form button[type="button"] {
+  border-color:#d0d5dd;
+  background:#fff;
+  color:#344054;
+  box-shadow:none;
+}
+
+.admin-form button:hover {
+  transform:translateY(-2px);
+  background:#d2a84e;
+  box-shadow:0 12px 24px rgba(197,154,59,.24);
+}
+
+.admin-item-list {
+  max-width:none;
+}
+
+.admin-item-list>div {
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.admin-item-list>div:hover {
+  border-color:#d8c58c;
+  box-shadow:0 8px 22px rgba(17,24,39,.06);
+}
+
+.admin-item-list button:not(.danger-button) {
+  border:1px solid #c59a3b;
+  background:#fffaf0;
+  color:#70531b;
+}
+
+.admin-item-list button:hover {
+  transform:translateY(-1px);
+}
+
+.admin-item-list .danger-button {
+  border-color:#d0d5dd;
+  background:#fff;
+  color:#344054;
+}
+
+.admin-item-list .danger-button:hover {
+  border-color:#9c6424;
+  background:#fffaf0;
+  color:#7a4514;
+}
+
+.mw-account-button,
+.modal-close,
+.challenge-modal-close,
+.account-tabs button {
+  transition:transform .18s ease, box-shadow .18s ease, background-color .18s ease, border-color .18s ease;
+}
+
+.account-tabs button.active {
+  border-color:#c59a3b;
+  background:#fffaf0;
+  color:#70531b;
+}
+
+.mw-account-button:hover {
+  background:#fffaf0 !important;
+}
+
+.hero-actions a,
+.register-button,
+.submit-registration,
+.challenge-banner button,
+.route-primary-action,
+.join-team-page button,
+.admin-login-form button {
+  border:1px solid #b68b2f;
+  background:#c59a3b !important;
+  color:#111827 !important;
+  box-shadow:0 10px 24px rgba(197,154,59,.20);
+}
+
+.hero-actions a:hover,
+.register-button:hover,
+.submit-registration:hover,
+.challenge-banner button:hover,
+.route-primary-action:hover,
+.join-team-page button:hover,
+.admin-login-form button:hover {
+  transform:translateY(-2px);
+  background:#d2a84e !important;
+  box-shadow:0 14px 28px rgba(197,154,59,.28);
+}
+
+button:disabled,
+a[aria-disabled="true"] {
+  cursor:not-allowed !important;
+  opacity:.48;
+  transform:none !important;
+  box-shadow:none !important;
+}
+
+/* Final button consistency pass */
+.mw-nav a,
+.inner-page-header a,
+.route-content a,
+.admin-main button,
+.admin-denied a,
+.admin-denied button,
+.challenge-modal button,
+.challenge-modal a {
+  -webkit-font-smoothing:antialiased;
+}
+
+.mw-hero a,
+.hero-actions a,
+.route-cta,
+.route-button,
+.route-primary-action,
+.title-actions a,
+.story-page .story-action,
+.opportunity-page .application-button,
+.apply-button,
+.join-team-page a,
+.join-team-page button,
+.register-button,
+.submit-registration,
+.vote-row button,
+.challenge-banner button,
+.event-card button,
+.events-page-grid button,
+.events-page-grid .route-cta,
+.admin-login-form button,
+.admin-form button,
+.admin-overview article button {
+  min-height:44px;
+  border:1px solid #b68b2f;
+  border-radius:9px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:12px 18px;
+  background:#c59a3b !important;
+  color:#111827 !important;
+  font-weight:900;
+  line-height:1;
+  text-align:center;
+  letter-spacing:.01em;
+  box-shadow:0 8px 20px rgba(197,154,59,.16);
+}
+
+.mw-hero a:hover,
+.hero-actions a:hover,
+.route-cta:hover,
+.route-button:hover,
+.route-primary-action:not(:disabled):hover,
+.title-actions a:hover,
+.story-page .story-action:hover,
+.opportunity-page .application-button:hover,
+.apply-button:hover,
+.join-team-page a:hover,
+.join-team-page button:not(:disabled):hover,
+.register-button:not(:disabled):hover,
+.submit-registration:not(:disabled):hover,
+.vote-row button:not(:disabled):hover,
+.challenge-banner button:not(:disabled):hover,
+.event-card button:not(:disabled):hover,
+.events-page-grid button:not(:disabled):hover,
+.events-page-grid .route-cta:hover,
+.admin-login-form button:not(:disabled):hover,
+.admin-form button:not(:disabled):hover,
+.admin-overview article button:not(:disabled):hover {
+  transform:translateY(-2px);
+  border-color:#9d7622;
+  background:#d2a84e !important;
+  box-shadow:0 12px 26px rgba(197,154,59,.24);
+}
+
+.mw-hero a:active,
+.hero-actions a:active,
+.route-cta:active,
+.route-button:active,
+.route-primary-action:not(:disabled):active,
+.title-actions a:active,
+.story-page .story-action:active,
+.opportunity-page .application-button:active,
+.apply-button:active,
+.join-team-page a:active,
+.join-team-page button:not(:disabled):active,
+.register-button:not(:disabled):active,
+.submit-registration:not(:disabled):active,
+.vote-row button:not(:disabled):active,
+.challenge-banner button:not(:disabled):active,
+.events-page-grid button:not(:disabled):active,
+.admin-login-form button:not(:disabled):active,
+.admin-form button:not(:disabled):active,
+.admin-overview article button:not(:disabled):active {
+  transform:translateY(0);
+  box-shadow:0 5px 12px rgba(197,154,59,.18);
+}
+
+.mw-hero a:focus-visible,
+.hero-actions a:focus-visible,
+.route-cta:focus-visible,
+.route-button:focus-visible,
+.route-primary-action:focus-visible,
+.title-actions a:focus-visible,
+.story-page .story-action:focus-visible,
+.opportunity-page .application-button:focus-visible,
+.apply-button:focus-visible,
+.join-team-page a:focus-visible,
+.join-team-page button:focus-visible,
+.register-button:focus-visible,
+.submit-registration:focus-visible,
+.vote-row button:focus-visible,
+.challenge-banner button:focus-visible,
+.events-page-grid button:focus-visible,
+.events-page-grid .route-cta:focus-visible,
+.admin-login-form button:focus-visible,
+.admin-form button:focus-visible,
+.admin-overview article button:focus-visible,
+.admin-item-list button:focus-visible,
+.admin-sidebar button:focus-visible {
+  outline:3px solid rgba(197,154,59,.32);
+  outline-offset:3px;
+}
+
+.admin-item-list button:not(.danger-button),
+.staff-table select,
+.admin-overview article button {
+  min-height:44px;
+}
+
+.admin-item-list .danger-button {
+  border-color:#b9bec6;
+  background:#fff !important;
+  color:#344054 !important;
+  box-shadow:none;
+}
+
+.admin-item-list .danger-button:hover {
+  border-color:#9c6424;
+  background:#fffaf0 !important;
+  color:#7a4514 !important;
+}
+
+.admin-sidebar nav button {
+  border-radius:9px;
+  font-weight:800;
+  letter-spacing:.01em;
+}
+
+.account-tabs button,
+.modal-close,
+.challenge-modal-close {
+  min-height:38px;
+  border-radius:8px;
+}
+
+.account-tabs button {
+  border:1px solid transparent;
+}
+
+.modal-close,
+.challenge-modal-close {
+  min-width:38px;
+  min-height:38px;
+  border:1px solid #dde1e7;
+  display:grid;
+  place-items:center;
+  padding:0;
+  background:#f5f6f8 !important;
+  color:#344054 !important;
+  box-shadow:none;
+}
+
+.modal-close:hover,
+.challenge-modal-close:hover {
+  transform:translateY(-1px);
+  border-color:#c59a3b;
+  background:#fffaf0 !important;
+}
