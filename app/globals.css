@@ -1637,6 +1637,7 @@ a.route-cta,
 .shop-checkout-card .challenge-registration-form textarea { width:100%; border:1px solid #d0d5dd; border-radius:8px; padding:11px 12px; }
 .shop-heading>button { min-width:190px; }
 .shop-cart-list { display:grid; gap:12px; margin:20px 0; padding:0 !important; list-style:none; }
+.shop-cart-empty { margin:20px 0; padding:18px; border:1px dashed #d0d5dd; border-radius:9px; color:#667085; text-align:center; }
 .shop-cart-list li { display:grid; grid-template-columns:minmax(0,1fr) auto auto; align-items:center; gap:14px; padding:12px 0; border-bottom:1px solid #eaecf0; }
 .shop-cart-list li>div:first-child { display:grid; gap:4px; }
 .shop-cart-list li>div:first-child span,.shop-payment-choice small { color:#667085; font-size:12px; }

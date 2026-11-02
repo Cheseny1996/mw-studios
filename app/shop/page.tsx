@@ -130,7 +130,7 @@ export default function ShopPage() {
       <section className="route-content">
         <div className="shop-heading">
           <div><span>THE COLLECTION</span><h2>Shop MzimaWells</h2></div>
-          <button type="button" disabled={!cartItems.length} onClick={() => setCartOpen(true)} aria-label={`Open basket with ${cartCount} items`}>
+          <button type="button" onClick={() => setCartOpen(true)} aria-label={`Open basket with ${cartCount} items`}>
             Basket · {cartCount} · KSh {total.toLocaleString()}
           </button>
         </div>
@@ -185,7 +185,7 @@ export default function ShopPage() {
         <div className="challenge-modal shop-checkout-card shop-cart-card" role="dialog" aria-modal="true" aria-label="Shopping basket">
           <button className="challenge-modal-close" type="button" aria-label="Close basket" onClick={() => setCartOpen(false)}>×</button>
           <span>YOUR BASKET</span><h2>Review your order</h2>
-          <ul className="shop-cart-list">{cartItems.map((item) => <li key={item._id}>
+          {cartItems.length ? <ul className="shop-cart-list">{cartItems.map((item) => <li key={item._id}>
             <div><b>{item.name}</b><span>KSh {item.price.toLocaleString()} each</span></div>
             <div className="shop-cart-item-actions">
               <button type="button" aria-label={`Remove one ${item.name}`} onClick={() => updateQuantity(item._id, -1)}>−</button>
@@ -193,7 +193,7 @@ export default function ShopPage() {
               <button type="button" aria-label={`Add one ${item.name}`} onClick={() => updateQuantity(item._id, 1)}>+</button>
             </div>
             <strong>KSh {(item.price * cart[item._id]).toLocaleString()}</strong>
-          </li>)}</ul>
+          </li>)}</ul> : <p className="shop-cart-empty">Your basket is empty. Add a product to get started.</p>}
           <div className="shop-cart-total"><b>Order total</b><strong>KSh {total.toLocaleString()}</strong></div>
           <button className="submit-registration" type="button" disabled={!cartItems.length} onClick={() => { setCartOpen(false); setCheckoutOpen(true); }}>Continue to checkout</button>
         </div>
