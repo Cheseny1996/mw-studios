@@ -23,7 +23,58 @@
   .team-crew-photo { height:300px; }
 }
 
-:root { --orange:#ff671f; --orange-soft:#ff7a2e; --ink:#111827; --muted:#667085; --paper:#f8f8f7; }
+:root { --master-gold:#f0d050; --orange:#f0d050; --orange-soft:#f3dc76; --ink:#111827; --muted:#667085; --paper:#f8f8f7; }
+
+/* Master gold brand palette */
+.mw-brand h1,
+.mw-nav a:hover,
+.what-icon,
+.what-card-action,
+.live-pill,
+.contestant-card>span,
+.stats strong,
+.stats b,
+.journey b,
+.winners span,
+.blog-card time,
+.story-back,
+.opportunity-meta a,
+.route-intro>span,
+.route-kicker,
+.route-prizes b,
+.story-page time,
+.careers-intro>span,
+.careers-list article>span,
+.episode-number,
+.podcast-card .card-body b { color:var(--master-gold); }
+
+.challenge-banner,
+.prize-art,
+.contestant-avatar,
+.vote-row button,
+.submit-registration,
+.challenge-modal .submit-registration,
+.title-actions button,
+.title-actions a,
+.event-email-action,
+.story-page .story-action,
+.opportunity-page .application-button,
+.admin-form button,
+.admin-sidebar>a:last-child,
+.inner-page-header a,
+.card-body button,
+.podcast-actions button,
+.event-card button { background:var(--master-gold); color:#111827; }
+
+.what-grid .what-card:hover,
+.what-grid .what-card:focus-visible { border-color:var(--master-gold); box-shadow:0 14px 34px rgba(240,208,80,.18); }
+.mw-hero a,
+.challenge-banner button { color:#111827; }
+.challenge-banner { background:linear-gradient(120deg,#171d2f,var(--master-gold)); }
+.challenge-banner div>span { color:#fff8c7; }
+.live-pill,
+.account-tabs button.active,
+.admin-status { background:#fff9d9; border-color:var(--master-gold); color:#111827; }
 * { box-sizing:border-box; }
 html { scroll-behavior:smooth; }
 body { margin:0; color:var(--ink); background:#fff; font-family:Arial, Helvetica, sans-serif; }
@@ -161,3 +212,66 @@ button { font-family:inherit; cursor:pointer; }
 @media (max-width:640px) {
   .route-content { padding:50px 20px; }.section-hero { min-height:300px; }.route-intro h2,.route-title h2,.join-team-page h2 { font-size:34px; }.route-story-grid,.route-values,.events-page-grid,.route-prizes,.team-page-grid,.team-page-winners { grid-template-columns:1fr; }.route-image { height:230px; }.team-page-grid img,.team-page-winners img { height:360px; }.team-page-photo { height:300px; }.episodes-list article { grid-template-columns:45px 1fr;padding:18px 0; }.episodes-list b { grid-column:2; }.join-team-page { padding:32px 24px; }.route-prizes article { min-height:180px; }.route-prizes h3 { margin-top:45px; }
 }
+
+/* Final master-color application: gold is the site-wide accent and hero color. */
+.mw-brand h1,
+.mw-nav a:hover,
+.mw-footer h2,
+.what-icon,
+.what-card-action,
+.live-pill,
+.contestant-card>span,
+.stats strong,
+.winners span,
+.values b,
+.journey b,
+.card-body button,
+.podcast-actions button,
+.event-card button,
+.blog-card time,
+.story-back,
+.opportunity-meta a,
+.episode-number,
+.route-intro>span,
+.route-title>span,
+.inline-action,
+.join-team-link,
+.mw-account-button { color:#f0d050; }
+
+.mw-account-button,
+.account-tabs button.active { border-color:#f0d050; }
+.account-tabs button.active,
+.live-pill { background:#fff9d9; }
+
+.submit-registration,
+.vote-row button,
+.title-actions button,
+.title-actions a,
+.event-email-action,
+.join-team-link,
+.join-team button,
+.register-button,
+.steps b,
+.story-page .story-action,
+.admin-form button,
+.admin-sidebar>a:last-child,
+.mw-footer .socials a,
+.route-button { background:#f0d050 !important; color:#111827 !important; }
+
+.mw-hero,
+.section-hero,
+.inner-hero,
+.podcast-hero { background:#f0d050 !important; color:#111827 !important; }
+.mw-hero a,
+.inner-hero a,
+.section-hero a { color:#111827; }
+
+.challenge-banner { background:linear-gradient(120deg,#171d2f,#f0d050); }
+.challenge-banner div>span { color:#fff7b5; }
+.challenge-banner button { background:#fff; color:#111827; }
+.route-prizes article:nth-child(1),
+.route-prizes article:nth-child(2),
+.route-prizes article:nth-child(3) { background:#f0d050; color:#111827; }
+.route-prizes article:nth-child(1) { box-shadow:0 8px 28px rgba(240,208,80,.25); }
+.route-prizes span,
+.route-prizes p { color:#111827; }
