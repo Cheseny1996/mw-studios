@@ -70,12 +70,11 @@ export default function Home() {
   const [accountMode, setAccountMode] = useState<"signin" | "signup">("signin");
   const [authNotice, setAuthNotice] = useState("");
   const [sessionUser, setSessionUser] = useState<{ name: string; email: string; role?: string } | null>(null);
-  const [authAfter, setAuthAfter] = useState<"challenge" | "event" | null>(null);
+  const [authAfter, setAuthAfter] = useState<"challenge" | null>(null);
   const [challengeNotice, setChallengeNotice] = useState("");
   const [selectedNews, setSelectedNews] = useState<string | null>(null);
   const [registeredCount, setRegisteredCount] = useState(0);
   const [contestants, setContestants] = useState<Array<{ _id: string; stageName?: string; fullName: string; category: string; entryTitle: string; photograph?: string; voteCount?: number }>>([]);
-  const [liveEvents, setLiveEvents] = useState<Array<{ _id: string; title: string; date: string; time?: string; location?: string; description?: string; excerpt?: string; registrationCount?: number }>>([]);
   useEffect(() => {
     fetch("/api/auth/session")
       .then((response) => response.ok ? response.json() : null)
@@ -89,10 +88,6 @@ export default function Home() {
         setContestants(data.contestants ?? []);
       })
       .catch(() => undefined);
-    fetch("/api/public/events")
-      .then((response) => response.ok ? response.json() : null)
-      .then((data) => setLiveEvents(data?.events ?? []))
-      .catch(() => setLiveEvents([]));
   }, []);
 
   useEffect(() => {
@@ -158,10 +153,6 @@ export default function Home() {
     if (authAfter === "challenge") {
       setRegistrationOpen(true);
       setChallengeNotice("Signed in. Complete your challenge registration below.");
-    }
-    if (authAfter === "event") {
-      document.querySelector("#events")?.scrollIntoView({ behavior: "smooth" });
-      setChallengeNotice("Signed in. Select Register Now on an event to continue.");
     }
     setAuthAfter(null);
   }
@@ -350,67 +341,6 @@ export default function Home() {
         <section className="mw-mission">
           <h2>Our Mission</h2>
           <p>We believe in the power of storytelling to inspire, educate, and connect communities. We are committed to producing high-quality content that resonates with audiences and creates lasting impact.</p>
-        </section>
-
-        <section className="mw-section news-section" id="news">
-          <div className="section-title"><h2>Latest News</h2><p>Stay updated with the latest from MzimaWells Studios</p></div>
-          <div className="news-grid">
-            {news.map(([title, date, copy, trending], index) => (
-              <article className="news-card" key={title}>
-                <div className={`card-art art-${index}`}><span>MzimaWells</span>{trending && <b>Trending</b>}</div>
-                <div className="card-body"><time>{date}</time><h3>{title}</h3><p>{copy}</p><a className="inline-action" href={`/blog/${title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`}>Read full story →</a></div>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="mw-section podcast-section" id="podcast">
-          <div className="section-title"><h2>K-Run Podcast</h2><p>Conversations that inspire, educate, and entertain</p><div className="title-actions"><a href="mailto:info@mzimawellsstudios.com?subject=K-Run%20Podcast%20subscription">Subscribe by email</a><a href="#episodes">View Episodes</a></div></div>
-          <div className="podcast-grid" id="episodes">
-            {episodes.map(([title, date, duration, copy], index) => (
-              <article className="podcast-card" key={title}>
-                <div className={`podcast-art podcast-art-${index}`}><span>K</span></div>
-                <div className="card-body"><time>{date} • {duration}</time><h3>{title}</h3><p>{copy}</p></div>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="mw-section events-section-page" id="events">
-          <div className="section-title"><h2>Events</h2><p>Join us for exciting events and experiences</p></div>
-          <h3 className="subheading">Upcoming Events</h3>
-          <div className="events-grid">
-            {(liveEvents.length ? liveEvents.map((event, index) => ({
-              title: event.title,
-              date: new Date(event.date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }),
-              time: event.time || "Time to be confirmed",
-              location: event.location || "MzimaWells Studios, Nairobi",
-              copy: event.description || event.excerpt || "Join us for an upcoming MzimaWells Studios experience.",
-              attendees: event.registrationCount || 0,
-              eventId: event._id,
-            })) : events.map(([title, date, time, location, copy, attendees], index) => ({ title, date, time, location, copy, attendees, eventId: "" }))).map(({ title, date, time, location, copy, attendees, eventId }, index) => (
-              <article className="event-card" key={title}>
-                <div className={`event-art event-art-${index}`}><span>{date.split(", ")[0]}</span></div>
-                <div className="card-body"><h3>{title}</h3><p>{copy}</p><ul><li>▣ {date}</li><li>◷ {time}</li><li>⌖ {location}</li><li>♙ {attendees} attendees registered</li></ul><button className="event-email-action" onClick={() => {
-                  if (!sessionUser) {
-                    setAuthAfter("event");
-                    setAccountMode("signup");
-                    setAccountOpen(true);
-                  } else {
-                    if (!eventId) { setChallengeNotice(`Registration for "${title}" is ready for your account.`); return; }
-                    fetch("/api/events/register", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ eventId }) })
-                      .then(async (response) => { const data = await response.json().catch(() => ({})); setChallengeNotice(data.error || data.message || "Registration status unavailable."); });
-                  }
-                }}>Register for event</button></div>
-              </article>
-            ))}
-          </div>
-          <h3 className="subheading past-title">Past Events</h3>
-          <div className="past-grid">
-            {["Jishindie Season 3 Round 3 - Meet the Candidates", "Jishindie Season 3 Round 4 Championship", "Weekly Jishindie T-Shirt Challenge Round 2"].map((title, index) => (
-              <article key={title}><div className={`past-art past-art-${index}`} /><h3>{title}</h3><time>{["October 18, 2024", "December 15, 2024", "December 1, 2024"][index]}</time></article>
-            ))}
-          </div>
         </section>
 
         <section className="mw-section jishindie-section-page" id="jishindie">
