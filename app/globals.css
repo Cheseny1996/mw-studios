@@ -813,3 +813,185 @@ body,
   border-color:#c59a3b !important;
   color:#111827 !important;
 }
+
+/* Professional shared button system */
+button,
+.mw-account-button,
+.hero-actions a,
+.route-cta,
+.route-button,
+.apply-button,
+.story-cta,
+.join-team-page a,
+.register-button,
+.submit-registration,
+.vote-row button,
+.podcast-actions button,
+.event-card button,
+.title-actions a,
+.title-actions button,
+.admin-form button,
+.opportunity-meta a,
+.opportunity-page .application-button,
+.inner-page-header a:not(.inner-brand) {
+  transition:transform .18s ease, box-shadow .18s ease, background-color .18s ease, border-color .18s ease, color .18s ease;
+}
+
+.mw-account-button,
+.route-cta,
+.route-button,
+.apply-button,
+.story-cta,
+.join-team-page a,
+.register-button,
+.submit-registration,
+.vote-row button,
+.podcast-actions button,
+.event-card button,
+.title-actions a,
+.title-actions button,
+.admin-form button,
+.opportunity-meta a,
+.opportunity-page .application-button,
+.challenge-banner button,
+.inner-page-header a:not(.inner-brand) {
+  min-height:44px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:8px;
+  font-weight:900;
+  letter-spacing:.01em;
+}
+
+.route-cta,
+.route-button,
+.apply-button,
+.story-cta,
+.join-team-page a,
+.register-button,
+.submit-registration,
+.vote-row button,
+.event-card button,
+.title-actions a,
+.title-actions button,
+.admin-form button,
+.opportunity-meta a,
+.opportunity-page .application-button,
+.challenge-banner button {
+  padding:12px 20px;
+  box-shadow:0 8px 20px rgba(197,154,59,.16);
+}
+
+.route-cta:hover,
+.route-button:hover,
+.apply-button:hover,
+.story-cta:hover,
+.join-team-page a:hover,
+.register-button:hover,
+.submit-registration:hover,
+.vote-row button:hover,
+.event-card button:hover,
+.title-actions a:hover,
+.title-actions button:hover,
+.admin-form button:hover,
+.opportunity-meta a:hover,
+.opportunity-page .application-button:hover,
+.challenge-banner button:hover,
+.hero-actions a:hover,
+.mw-account-button:hover,
+.inner-page-header a:not(.inner-brand):hover {
+  transform:translateY(-2px);
+  box-shadow:0 12px 26px rgba(197,154,59,.24);
+}
+
+.route-cta:active,
+.route-button:active,
+.apply-button:active,
+.story-cta:active,
+.join-team-page a:active,
+.register-button:active,
+.submit-registration:active,
+.vote-row button:active,
+.event-card button:active,
+.title-actions a:active,
+.title-actions button:active,
+.admin-form button:active,
+.challenge-banner button:active,
+.hero-actions a:active,
+.mw-account-button:active,
+.inner-page-header a:not(.inner-brand):active {
+  transform:translateY(0);
+  box-shadow:0 4px 12px rgba(197,154,59,.18);
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline:3px solid rgba(197,154,59,.36);
+  outline-offset:3px;
+}
+
+.mw-account-button {
+  min-height:40px;
+  padding:9px 16px;
+  background:#fff !important;
+  color:#111827 !important;
+  border:1px solid #c59a3b !important;
+  box-shadow:none;
+}
+
+.hero-actions a,
+.title-actions a:first-child {
+  border-radius:8px;
+  box-shadow:0 10px 24px rgba(197,154,59,.22);
+}
+
+.inner-page-header > .inner-brand {
+  min-height:44px;
+  display:inline-flex;
+  align-items:center;
+  padding:0;
+  background:transparent !important;
+  border:0;
+  box-shadow:none;
+}
+
+.inner-page-header > a:not(.inner-brand) {
+  padding:11px 16px;
+  border:1px solid #c59a3b;
+  background:#fff !important;
+  color:#111827 !important;
+  box-shadow:none;
+}
+
+.inner-page-header > a:not(.inner-brand):hover {
+  background:#c59a3b !important;
+  border-color:#c59a3b;
+}
+
+.modal-close {
+  border:1px solid #e2e5ea !important;
+  box-shadow:0 5px 14px rgba(17,24,39,.08);
+  transition:transform .18s ease, background-color .18s ease;
+}
+
+.modal-close:hover {
+  transform:rotate(4deg) scale(1.04);
+  background:#fff3d4 !important;
+}
+
+.account-tabs button {
+  min-height:44px;
+  border-radius:8px;
+}
+
+.vote-row button:disabled,
+.submit-registration:disabled,
+.register-button:disabled {
+  opacity:.52;
+  cursor:not-allowed;
+  transform:none;
+  box-shadow:none;
+}
