@@ -14,9 +14,38 @@ const fallback = [
 ] as const;
 
 export default function EventsPage() {
-  const [events,setEvents] = useState<Array<{_id:string;title:string;date:string;time?:string;location?:string;description?:string;registrationCount?:number}>>([]);
+  const [events,setEvents] = useState<Array<{_id:string;title:string;date:string;time?:string;location?:string;description?:string;registrationCount?:number;displayDate?:string}>>([]);
   const [notice,setNotice] = useState("");
-  useEffect(()=>{fetch("/api/public/events").then(r=>r.ok?r.json():null).then(d=>setEvents(d?.events||[])).catch(()=>setEvents([]));},[]);
+  useEffect(()=>{
+    const runEvent = {
+      _id: "kapsokwony-annual-run",
+      title: "Kapsokwony Annual Run",
+      date: "2026-12-15T00:00:00.000Z",
+      time: "See event schedule",
+      location: "Kapsokwony, Kenya",
+      description: "The famous annual Kapsokwony Run community event.",
+      registrationCount: 0,
+    };
+    const fallbackEvents = fallback.map(([title,date,time,location,copy],index)=>({
+      _id: `event-${index}`,
+      title,
+      date: date.includes("2026") ? "2026-11-14T00:00:00.000Z" : "2026-01-01T00:00:00.000Z",
+      time,
+      location,
+      description: copy,
+      registrationCount: 0,
+      displayDate: date,
+    })).filter((event)=>event.title !== "Kapsokwony Annual Run");
+    fetch("/api/public/events")
+      .then(r=>r.ok?r.json():null)
+      .then(d=>{
+        const published = Array.isArray(d?.events)
+          ? d.events.filter((event:{title?:string})=>event.title !== "Kapsokwony Annual Run")
+          : [];
+        setEvents([runEvent, ...published, ...fallbackEvents.filter((item)=>!published.some((event:{title?:string})=>event.title===item.title))]);
+      })
+      .catch(()=>setEvents([runEvent,...fallbackEvents]));
+  },[]);
 
   async function register(eventId:string) {
     const response=await fetch("/api/events/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({eventId})});
@@ -29,7 +58,7 @@ export default function EventsPage() {
       <section className="inner-hero section-hero events-hero"><span>LIVE & IN PERSON</span><h1>Moments made to<br/>bring people together.</h1></section>
       <section className="route-content"><div className="route-title"><span>UPCOMING</span><h2>Events at MzimaWells</h2></div>{notice&&<p className="challenge-notice">{notice}</p>}
         <div className="events-page-grid">
-          {events.length ? events.map((event,index)=><article key={event._id}><div className={`route-event-art event-tone-${index%3}`}><span>{new Date(event.date).toLocaleDateString("en-GB",{day:"2-digit",month:"short"})}</span></div><div><h3>{event.title}</h3><p>{event.description}</p><ul><li>{event.time||"Time to be confirmed"}</li><li>{event.location||"MzimaWells Studios, Nairobi"}</li><li>{event.registrationCount||0} registered</li></ul><button className="route-cta route-button" onClick={()=>register(event._id)}>Register for event</button></div></article>) : fallback.map(([title,date,time,location,copy],index)=><article key={title}><div className={`route-event-art event-tone-${index}`}><span>{date.split(" ")[0]+" "+date.split(" ")[1]}</span></div><div><h3>{title}</h3><p>{copy}</p><ul><li>{time}</li><li>{location}</li></ul><Link className="route-cta route-button" href="/#events">View registration details</Link></div></article>)}
+          {events.map((event,index)=><article key={event._id}><div className={`route-event-art event-tone-${index%3}`}><span>{event.displayDate || new Date(event.date).toLocaleDateString("en-GB",{day:"2-digit",month:"short"})}</span></div><div><h3>{event.title}</h3><p>{event.description}</p><ul><li>{event.time||"Time to be confirmed"}</li><li>{event.location||"MzimaWells Studios, Nairobi"}</li><li>{event.registrationCount||0} registered</li></ul>{event._id.startsWith("event-")||event._id==="kapsokwony-annual-run"?<Link className="route-cta route-button" href="/#events">View event details</Link>:<button className="route-cta route-button" onClick={()=>register(event._id)}>Register for event</button>}</div></article>)}
         </div>
       </section>
     </main>

@@ -354,6 +354,20 @@ export default function Home() {
 
         <section className="mw-section team-section" id="team">
           <div className="section-title"><h2>Our Team</h2><p>Meet the creative minds behind MzimaWells Studios</p></div>
+          <div className="home-crew-grid">
+            {[
+              ["Dokta Will","Creative Director","/crew/dokta-will.jpeg"],
+              ["Director Brian K","Production Director","/crew/director-brian-k.jpeg"],
+              ["Director Abel Kibet","Content Director","/crew/director-abel-kibet.jpeg"],
+              ["Duke Of Nomcity","Technical Director","/crew/director-duke-of-nomcity.jpeg"],
+            ].map(([name,designation,photo])=>(
+              <article key={name}>
+                <Image src={photo} alt={`${name}, ${designation}`} width={500} height={600}/>
+                <h3>{name}</h3>
+                <p>{designation}</p>
+              </article>
+            ))}
+          </div>
           <div className="title-actions"><a href="/team">Meet the team</a><a href="/careers">View careers</a></div>
         </section>
       </main>
