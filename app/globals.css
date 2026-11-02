@@ -1606,3 +1606,7 @@ a[aria-disabled="true"] {
   border-color:#c59a3b;
   background:#fffaf0 !important;
 }
+
+.run-challenge-section { padding-top:54px; }
+.run-challenge-actions { display:flex; flex-wrap:wrap; gap:12px; margin:20px 0 28px; }
+.run-challenge-actions .route-primary-action { text-decoration:none; }

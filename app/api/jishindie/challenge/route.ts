@@ -82,6 +82,7 @@ export async function GET(request: NextRequest) {
 }
 
 const registrationSchema = z.object({
+  challengeSlug: z.string().trim().min(2).max(100).optional(),
   fullName: z.string().trim().min(2).max(100),
   stageName: z.string().trim().max(100).optional(),
   email: z.string().trim().email().max(254),
@@ -110,7 +111,9 @@ export async function POST(request: NextRequest) {
   }
   await connectToDatabase();
   try {
-    const slug = "weekly-jishindie";
+    const slug = parsed.data.challengeSlug === "kapsokwony-annual-run"
+      ? "kapsokwony-annual-run"
+      : "weekly-jishindie";
     const entry = await ChallengeRegistrationModel.findOneAndUpdate(
       { challengeSlug: slug, email: parsed.data.email.toLowerCase() },
       {

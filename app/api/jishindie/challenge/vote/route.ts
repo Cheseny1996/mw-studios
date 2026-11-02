@@ -8,6 +8,7 @@ import { getJishindieSchedule } from "../route";
 const schema = z.object({
   contestantId: z.string().min(1),
   voterId: z.string().min(1).max(128).optional(),
+  challengeSlug: z.enum(["weekly-jishindie", "kapsokwony-annual-run"]).optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -22,6 +23,7 @@ export async function POST(request: NextRequest) {
     }, { status: 409 });
   }
   await connectToDatabase();
+  const challengeSlug = parsed.data.challengeSlug || "weekly-jishindie";
   let voterId = parsed.data.voterId || request.headers.get("x-mzima-voter-id");
   if (!voterId) {
     voterId = crypto.randomUUID();
@@ -29,13 +31,13 @@ export async function POST(request: NextRequest) {
   }
   const contestant = await ChallengeRegistrationModel.findOne({
     _id: parsed.data.contestantId,
-    challengeSlug: "weekly-jishindie",
+    challengeSlug,
     status: "approved",
   }).lean();
   if (!contestant) return NextResponse.json({ error: "This contestant is not currently approved for voting." }, { status: 404 });
   try {
     await ChallengeVoteModel.create({
-      challengeSlug: "weekly-jishindie",
+      challengeSlug,
       contestantId: contestant._id,
       voterId,
       auditReference: `MWJ-${crypto.randomBytes(12).toString("hex").toUpperCase()}`,
