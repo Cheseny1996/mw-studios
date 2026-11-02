@@ -82,3 +82,31 @@ const ContentSchema = new Schema({
 }, { timestamps: true });
 
 export const ContentModel = models.Content ?? mongoose.model("Content", ContentSchema);
+
+export const ChallengeRegistrationSchema = new Schema({
+  challengeSlug: { type: String, required: true, index: true },
+  fullName: { type: String, required: true, trim: true },
+  stageName: { type: String, trim: true, default: "" },
+  email: { type: String, required: true, lowercase: true, trim: true },
+  phone: { type: String, required: true, trim: true },
+  category: { type: String, enum: ["music", "dance", "film", "fashion", "comedy", "content"], required: true },
+  entryTitle: { type: String, required: true, trim: true },
+  entryLink: { type: String, default: "" },
+  status: { type: String, enum: ["registered", "review", "approved", "rejected"], default: "registered", index: true },
+  voterId: { type: String, default: "" },
+}, { timestamps: true });
+ChallengeRegistrationSchema.index({ challengeSlug: 1, email: 1 }, { unique: true });
+ChallengeRegistrationSchema.index({ challengeSlug: 1, status: 1, voterId: 1 });
+
+export const ChallengeRegistrationModel = models.ChallengeRegistration ?? mongoose.model("ChallengeRegistration", ChallengeRegistrationSchema);
+
+const ChallengeVoteSchema = new Schema({
+  challengeSlug: { type: String, required: true, index: true },
+  contestantId: { type: Schema.Types.ObjectId, ref: "ChallengeRegistration", required: true },
+  voterId: { type: String, required: true },
+  auditReference: { type: String, required: true },
+}, { timestamps: true });
+ChallengeVoteSchema.index({ challengeSlug: 1, voterId: 1 }, { unique: true });
+ChallengeVoteSchema.index({ challengeSlug: 1, contestantId: 1 });
+
+export const ChallengeVoteModel = models.ChallengeVote ?? mongoose.model("ChallengeVote", ChallengeVoteSchema);

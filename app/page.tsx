@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 const news = [
   ["MzimaWells Studios Launches New Podcast Series", "December 15, 2024", "Exciting new content coming your way with K-Run Podcast exploring stories from across the continent.", true],
@@ -30,6 +30,62 @@ const events = [
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [registrationOpen, setRegistrationOpen] = useState(false);
+  const [challengeNotice, setChallengeNotice] = useState("");
+  const [registeredCount, setRegisteredCount] = useState(0);
+  const [contestants, setContestants] = useState<Array<{ _id: string; stageName?: string; fullName: string; category: string; entryTitle: string; voteCount?: number }>>([]);
+  useEffect(() => {
+    fetch("/api/jishindie/challenge")
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => {
+        if (!data) return;
+        setRegisteredCount(data.registered ?? 0);
+        setContestants(data.contestants ?? []);
+      })
+      .catch(() => undefined);
+  }, []);
+
+  async function registerForChallenge(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const payload = Object.fromEntries(new FormData(form));
+    setChallengeNotice("Submitting your registration...");
+    const response = await fetch("/api/jishindie/challenge", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      setChallengeNotice(data.error || "Registration could not be completed.");
+      return;
+    }
+    setChallengeNotice(data.message || "Registration received.");
+    if (data.voterId) localStorage.setItem("mw_jishindie_voter", data.voterId);
+    setRegisteredCount((count) => count + 1);
+    form.reset();
+  }
+
+  async function voteForContestant(contestantId: string) {
+    const voterId = localStorage.getItem("mw_jishindie_voter");
+    if (!voterId) {
+      setChallengeNotice("Register for the challenge before voting for a contestant.");
+      setRegistrationOpen(true);
+      return;
+    }
+    const response = await fetch("/api/jishindie/challenge/vote", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ contestantId, voterId }),
+    });
+    const data = await response.json().catch(() => ({}));
+    setChallengeNotice(data.error || data.message || "Vote status unavailable.");
+    if (response.ok) {
+      setContestants((current) => current.map((contestant) => contestant._id === contestantId
+        ? { ...contestant, voteCount: (contestant.voteCount ?? 0) + 1 }
+        : contestant));
+    }
+  }
   const nav = [
     ["Home", "#home"],
     ["News", "#news"],
@@ -127,21 +183,65 @@ export default function Home() {
         </section>
 
         <section className="mw-section jishindie-section-page" id="jishindie">
-          <div className="section-title"><h2>Jishindie Challenge</h2><p>Empowering creators to showcase their talent and compete for recognition</p></div>
-          <div className="jishindie-about"><h3>What is Jishindie?</h3><p>Jishindie Challenge is our flagship creative competition for emerging artists, filmmakers, and content creators. It provides a stage to showcase work and empower talent through film, music, and digital content.</p></div>
+          <div className="section-title jishindie-heading"><span className="live-pill">THIS WEEK'S CHALLENGE</span><h2>Jishindie Challenge</h2><p>Register. Create. Compete. Get voted. Win MzimaWells prizes.</p></div>
+          <div className="challenge-banner">
+            <div><span>WEEKLY CREATOR CHALLENGE</span><h3>Show your talent. Become a fan favourite.</h3><p>Open to artists, dancers, filmmakers, comedians, fashion creators and digital storytellers.</p></div>
+            <button onClick={() => setRegistrationOpen(true)}>Register to compete <b>→</b></button>
+          </div>
           <div className="stats">
-            {[["500+", "Participants"], ["50+", "Winners"], ["1000+", "Submissions"], ["$10K", "Prize Pool"]].map(([value, label]) => <div key={label}><strong>{value}</strong><span>{label}</span></div>)}
+            {[String(registeredCount), "3", "3", "KSH Prizes"].map((value, index) => <div key={index}><strong>{value}</strong><span>{["Registered creators", "Prize tiers", "Ways to vote", "Rewards"][index]}</span></div>)}
           </div>
-          <h3 className="subheading">Recent Winners</h3>
-          <div className="winners">
-            {[["Academician Kibet OGW", "Team Strong"], ["Ann Cheroo", "Team Fearless Force"], ["Caleb Junior", "Team Strong"]].map(([name, team], index) => <article key={name}><div className={`winner-art winner-${index}`} /><h4>{name}</h4><p>{index ? "Weekly T-Shirt Challenge Winner" : "Weekly T-Shirt Challenge Champion"}</p><span>{team}</span></article>)}
+          <h3 className="subheading prize-heading">Challenge prizes</h3>
+          <div className="prizes">
+            {[["01", "Grand Prize", "MzimaWells feature outfit + branded merchandise"], ["02", "Runner Up", "Official MzimaWells hoodie + studio access"], ["03", "Fan Favourite", "MzimaWells mug + branded T-shirt"]].map(([number, title, copy]) => <article key={title}><span>{number}</span><div className="prize-art">MW</div><h4>{title}</h4><p>{copy}</p></article>)}
           </div>
-          <h3 className="subheading">How to Participate</h3>
+          <h3 className="subheading">Approved contestants</h3>
+          {contestants.length ? (
+            <div className="contestant-grid">
+              {[...contestants].sort((a, b) => (b.voteCount ?? 0) - (a.voteCount ?? 0)).map((contestant, index) => (
+                <article className="contestant-card" key={contestant._id}>
+                  <div className="contestant-avatar">{String(index + 1).padStart(2, "0")}</div>
+                  <span>{contestant.category}</span>
+                  <h4>{contestant.stageName || contestant.fullName}</h4>
+                  <p>{contestant.entryTitle}</p>
+                  <div className="vote-row"><strong>{contestant.voteCount ?? 0} votes</strong><button onClick={() => voteForContestant(contestant._id)}>Vote</button></div>
+                </article>
+              ))}
+            </div>
+          ) : <div className="empty-contestants"><b>Contestants are being reviewed.</b><p>Approved entries will appear here before voting opens.</p></div>}
+          <h3 className="subheading">How to take part</h3>
           <div className="steps">
             {[["Register", "Sign up during the open period."], ["Create", "Develop content following the theme and guidelines."], ["Submit", "Upload your submission before the deadline."], ["Win", "Top entries receive prizes and industry opportunities."]].map(([title, copy], index) => <article key={title}><b>{index + 1}</b><div><h4>{title}</h4><p>{copy}</p></div></article>)}
           </div>
-          <button className="register-button">Register for Next Challenge</button>
+          <button className="register-button" onClick={() => setRegistrationOpen(true)}>Register for the challenge</button>
+          {challengeNotice && <p className="challenge-notice" role="status">{challengeNotice}</p>}
         </section>
+
+        {registrationOpen && (
+          <div className="challenge-modal-backdrop" role="presentation" onMouseDown={(event) => {
+            if (event.currentTarget === event.target) setRegistrationOpen(false);
+          }}>
+            <div className="challenge-modal" role="dialog" aria-modal="true" aria-labelledby="challenge-registration-title">
+              <button className="modal-close" aria-label="Close registration" onClick={() => setRegistrationOpen(false)}>×</button>
+              <span className="live-pill">OPEN REGISTRATION</span>
+              <h2 id="challenge-registration-title">Join the Jishindie Challenge</h2>
+              <p>Register your talent once, then return for voting when your entry is approved.</p>
+              <form onSubmit={registerForChallenge}>
+                <div className="form-grid">
+                  <label>Full name<input name="fullName" required minLength={2} maxLength={100} /></label>
+                  <label>Stage or team name<input name="stageName" maxLength={100} /></label>
+                  <label>Email address<input name="email" type="email" required maxLength={254} /></label>
+                  <label>Phone number<input name="phone" type="tel" required minLength={7} maxLength={32} /></label>
+                  <label>Category<select name="category" required defaultValue=""><option value="" disabled>Select a category</option><option value="music">Music</option><option value="dance">Dance</option><option value="film">Film</option><option value="fashion">Fashion</option><option value="comedy">Comedy</option><option value="content">Content creation</option></select></label>
+                  <label>Entry title<input name="entryTitle" required minLength={2} maxLength={160} /></label>
+                  <label className="full-field">Entry link<input name="entryLink" type="url" placeholder="https://youtube.com/..." /></label>
+                </div>
+                <button className="submit-registration" type="submit">Submit entry</button>
+              </form>
+              {challengeNotice && <p className="challenge-notice" role="status">{challengeNotice}</p>}
+            </div>
+          </div>
+        )}
 
         <section className="mw-section about-section" id="about">
           <div className="section-title"><h2>About Us</h2><p>We are a creative content studio dedicated to telling authentic African stories through video, podcasting, and digital media.</p></div>
